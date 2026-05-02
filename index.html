@@ -410,7 +410,7 @@
   }
 
   .engine{--accent:#f7ca18;}
-  .foundry{--accent:#f97316;}
+  .mint{--accent:#f97316;}
   .dominion{--accent:#ef4444;}
   .vault{--accent:#22d3ee;}
 
@@ -429,7 +429,7 @@
   }
 
   .engine .game-thumb{background-image:url('tne_thumbnail.png');}
-  .foundry .game-thumb{background-image:url('tf_thumbnail.png');}
+  .mint .game-thumb{background-image:url('mag_thumbnail.png');}
   .dominion .game-thumb{background-image:url('dop_thumbnail.png');}
   .vault .game-thumb{background-image:url('sv_thumbnail.png');}
 
@@ -614,22 +614,22 @@
         </article>
 
         <article class="game-card vault">
-          <div class="game-thumb" aria-hidden="true"></div>
-          <div class="game-content">
-            <h2 class="game-title">Strategic Vault</h2>
-            <p class="game-tagline">Think like a strategist: weigh risk, predict rivals, and choose when the outcome depends on more than you.</p>
-            <div class="topic-list">
-              <span class="topic-chip">Uncertainty</span>
-              <span class="topic-chip">Risk and Insurance</span>
-              <span class="topic-chip">Game Theory</span>
-              <span class="topic-chip">Strategic Interaction</span>
-            </div>
-            <div class="game-meta">
-              <div class="status-line"><span>Status</span><span class="status-value" id="status-vault">Ready</span></div>
-              <button class="enter-btn" onclick="selectGame('vault')">Enter Vault</button>
-            </div>
-          </div>
-        </article>
+  <div class="game-thumb" aria-hidden="true"></div>
+  <div class="game-content">
+    <h2 class="game-title">The Mint of Ash and Gold</h2>
+    <p class="game-tagline">Master money, growth, and stabilization: trace inflation, build the long run, and steady the economy when shocks strike.</p>
+    <div class="topic-list">
+      <span class="topic-chip">Money Supply</span>
+      <span class="topic-chip">Economic Growth</span>
+      <span class="topic-chip">Inflation</span>
+      <span class="topic-chip">AD-AS Stabilization</span>
+    </div>
+    <div class="game-meta">
+      <div class="status-line"><span>Status</span><span class="status-value" id="status-vault">Ready</span></div>
+      <button class="enter-btn" onclick="selectGame('vault')">Enter the Mint</button>
+    </div>
+  </div>
+</article>
         
         <article class="game-card foundry">
           <div class="game-thumb" aria-hidden="true"></div>
@@ -746,12 +746,12 @@
     engine: {
       title: "The National Engine",
       file: "https://wjbyrd.github.io/The-National-Engine/",
-      statusKey: "macroHub_engine_complete"
+      statusKey: "microHub_engine_complete"
     },
-    foundry: {
-      title: "The Foundry",
-      file: "https://wjbyrd.github.io/The-Foundry/",
-      statusKey: "macroHub_foundry_complete"
+    mint: {
+      title: "The Mint of Ash and Gold",
+      file: "https://wjbyrd.github.io/The-Mint-of-Ash-and-Gold/",
+      statusKey: "microHub_mint_complete"
     },
     dominion: {
       title: "Dominion of Power",
