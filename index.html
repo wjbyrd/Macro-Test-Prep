@@ -307,46 +307,72 @@
 
 .hub-smoke span{
   position:absolute;
-  bottom:-220px;
-  width:90px;
-  height:520px;
-  border-radius:50%;
-  background:
-    radial-gradient(ellipse at center,
-      rgba(210,225,255,.38) 0%,
-      rgba(160,185,230,.20) 28%,
-      rgba(120,150,210,.08) 58%,
-      transparent 78%);
-  filter:blur(26px);
+  bottom:-260px;
+  width:34px;
+  height:760px;
   opacity:0;
-  animation:hubSmokeRise 20s ease-in-out infinite;
+  filter:blur(10px);
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(230,240,255,.00) 8%,
+      rgba(230,240,255,.38) 18%,
+      rgba(170,205,255,.24) 38%,
+      rgba(230,240,255,.32) 58%,
+      rgba(150,190,255,.16) 76%,
+      transparent 100%
+    );
+  border-radius:999px;
   transform-origin:center bottom;
+  animation:hubSmokeStringRise 18s ease-in-out infinite;
 }
 
-.hub-smoke span:nth-child(1){left:8%; animation-delay:0s;}
-.hub-smoke span:nth-child(2){left:22%; animation-delay:4s; height:620px;}
-.hub-smoke span:nth-child(3){left:39%; animation-delay:8s;}
-.hub-smoke span:nth-child(4){left:57%; animation-delay:2s; height:680px;}
-.hub-smoke span:nth-child(5){left:74%; animation-delay:6s;}
-.hub-smoke span:nth-child(6){left:88%; animation-delay:10s; height:600px;}
+.hub-smoke span::before,
+.hub-smoke span::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border-radius:999px;
+  background:inherit;
+  opacity:.75;
+}
 
-@keyframes hubSmokeRise{
+.hub-smoke span::before{
+  transform:translateX(-22px) rotate(-7deg) scaleX(.45);
+}
+
+.hub-smoke span::after{
+  transform:translateX(24px) rotate(9deg) scaleX(.35);
+}
+
+.hub-smoke span:nth-child(1){left:7%; animation-delay:0s;}
+.hub-smoke span:nth-child(2){left:20%; animation-delay:3s; height:820px;}
+.hub-smoke span:nth-child(3){left:35%; animation-delay:6s;}
+.hub-smoke span:nth-child(4){left:52%; animation-delay:1.5s; height:880px;}
+.hub-smoke span:nth-child(5){left:69%; animation-delay:5s;}
+.hub-smoke span:nth-child(6){left:86%; animation-delay:8s; height:840px;}
+
+@keyframes hubSmokeStringRise{
   0%{
-    transform:translateY(0) translateX(0) scaleX(.45) scaleY(.65) rotate(-4deg);
+    transform:translateY(0) translateX(0) scaleX(.45) rotate(-3deg);
     opacity:0;
   }
-  12%{
-    opacity:.55;
+  8%{
+    opacity:.82;
   }
-  45%{
-    transform:translateY(-45vh) translateX(32px) scaleX(.8) scaleY(1.05) rotate(5deg);
+  40%{
+    transform:translateY(-42vh) translateX(42px) scaleX(.75) rotate(5deg);
+    opacity:.58;
+  }
+  70%{
+    transform:translateY(-78vh) translateX(-26px) scaleX(1.05) rotate(-6deg);
     opacity:.32;
   }
-  75%{
-    opacity:.18;
-  }
   100%{
-    transform:translateY(-120vh) translateX(-28px) scaleX(1.15) scaleY(1.35) rotate(-7deg);
+    transform:translateY(-125vh) translateX(30px) scaleX(1.35) rotate(8deg);
     opacity:0;
   }
 }
@@ -651,7 +677,7 @@
   <main id="mainMenu" aria-label="Game selection menu">
     <div class="menu-shell">
         <div class="hub-smoke" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
       <header class="menu-header">
         <p class="menu-kicker">Macroeconomics Review System</p>
