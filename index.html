@@ -938,6 +938,8 @@ function drawMist(){
   mistCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   mistCtx.globalCompositeOperation = "lighter";
   drawMistVeil();
+  const wind = Math.sin(Date.now() * 0.0002) * 20;
+  mistCtx.setTransform(1, 0, 0.02 * Math.sin(Date.now() * 0.0001), 1, wind * 0.1, 0);
 
   for(const p of mistDots){
     p.x += p.vx;
@@ -970,6 +972,8 @@ function drawMist(){
       Object.assign(p, makeMistDot(false));
     }
   }
+
+  mistCtx.setTransform(1,0,0,1,0,0);
 
   requestAnimationFrame(drawMist);
 }
