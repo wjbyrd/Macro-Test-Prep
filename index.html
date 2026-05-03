@@ -288,6 +288,28 @@
     letter-spacing:.04em;
   }
 
+#mainMenu{
+  position:relative;
+  overflow:hidden;
+}
+
+.menu-video-bg{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+  pointer-events:none;
+  z-index:1;
+  opacity:.45;
+  mix-blend-mode:screen;
+}
+
+.menu-shell{
+  position:relative;
+  z-index:2;
+}
+
 .game-grid{
   display:grid;
   grid-template-columns:repeat(4, minmax(0, 1fr));
@@ -586,6 +608,9 @@
   </button>
 
   <main id="mainMenu" aria-label="Game selection menu">
+    <video class="menu-video-bg" autoplay muted loop playsinline aria-hidden="true">
+      <source src="menu_mist.mp4" type="video/mp4">
+    </video>
     <div class="menu-shell">
       <header class="menu-header">
         <p class="menu-kicker">Macroeconomics Review System</p>
