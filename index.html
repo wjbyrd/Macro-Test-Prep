@@ -304,11 +304,7 @@
   pointer-events:none;
   z-index:1;
   mix-blend-mode:screen;
-}
-
-.menu-shell{
-  position:relative;
-  z-index:2;
+  opacity:1;
 }
 
 .hub-mist span{
@@ -321,22 +317,22 @@
     radial-gradient(ellipse at 20% 50%, rgba(210,225,255,.26), transparent 34%),
     radial-gradient(ellipse at 50% 55%, rgba(180,210,255,.20), transparent 38%),
     radial-gradient(ellipse at 78% 45%, rgba(230,240,255,.18), transparent 32%);
-  filter:blur(26px);
-  opacity:.22;
+  filter:blur(18px);
+  opacity:.42;
   animation:mistRoll 38s ease-in-out infinite alternate;
 }
 
 .hub-mist span:nth-child(1){
   bottom:5%;
   height:190px;
-  opacity:.28;
+  opacity:.55;
   animation-duration:46s;
 }
 
 .hub-mist span:nth-child(2){
   bottom:18%;
   height:130px;
-  opacity:.20;
+  opacity:.42;
   animation-duration:34s;
   animation-delay:-9s;
 }
@@ -344,7 +340,7 @@
 .hub-mist span:nth-child(3){
   bottom:33%;
   height:110px;
-  opacity:.16;
+  opacity:.34;
   animation-duration:52s;
   animation-delay:-18s;
 }
@@ -352,7 +348,7 @@
 .hub-mist span:nth-child(4){
   bottom:50%;
   height:95px;
-  opacity:.12;
+  opacity:.26;
   animation-duration:41s;
   animation-delay:-6s;
 }
@@ -360,7 +356,7 @@
 .hub-mist span:nth-child(5){
   bottom:68%;
   height:80px;
-  opacity:.09;
+  opacity:.20;
   animation-duration:58s;
   animation-delay:-22s;
 }
