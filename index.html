@@ -324,12 +324,77 @@
     smokeMorph 6s ease-in-out infinite alternate;
 }
 
-.hub-smoke span:nth-child(1){left:-8%; animation-delay:0s, 0s;}
-.hub-smoke span:nth-child(2){left:10%; animation-delay:3s, 1s; width:240px;}
-.hub-smoke span:nth-child(3){left:30%; animation-delay:6s, 2s; width:190px;}
-.hub-smoke span:nth-child(4){left:50%; animation-delay:1.5s, .5s; width:260px;}
-.hub-smoke span:nth-child(5){left:74%; animation-delay:5s, 1.5s; width:220px;}
-.hub-smoke span:nth-child(6){left:96%; animation-delay:8s, 2.5s; width:240px;}
+.hub-smoke span:nth-child(1){
+  left:-10%;
+  width:150px;
+  height:430px;
+  filter:blur(18px);
+  animation-duration:14s, 5s;
+  animation-delay:0s, 0s;
+}
+
+.hub-smoke span:nth-child(2){
+  left:8%;
+  width:260px;
+  height:620px;
+  filter:blur(22px);
+  animation-duration:24s, 8s;
+  animation-delay:2s, 1s;
+}
+
+.hub-smoke span:nth-child(3){
+  left:27%;
+  width:90px;
+  height:700px;
+  filter:blur(9px);
+  animation-duration:19s, 4.5s;
+  animation-delay:5s, .5s;
+}
+
+.hub-smoke span:nth-child(4){
+  left:48%;
+  width:310px;
+  height:480px;
+  filter:blur(28px);
+  animation-duration:16s, 7s;
+  animation-delay:1s, 2s;
+}
+
+.hub-smoke span:nth-child(5){
+  left:70%;
+  width:120px;
+  height:760px;
+  filter:blur(11px);
+  animation-duration:27s, 6s;
+  animation-delay:4s, 1.5s;
+}
+
+.hub-smoke span:nth-child(6){
+  left:94%;
+  width:240px;
+  height:520px;
+  filter:blur(24px);
+  animation-duration:21s, 9s;
+  animation-delay:7s, 2.5s;
+}
+
+  .hub-smoke span:nth-child(7){
+  left:38%;
+  width:70px;
+  height:820px;
+  filter:blur(7px);
+  animation-duration:13s, 4s;
+  animation-delay:9s, 0s;
+}
+
+.hub-smoke span:nth-child(8){
+  left:82%;
+  width:330px;
+  height:390px;
+  filter:blur(32px);
+  animation-duration:18s, 10s;
+  animation-delay:11s, 3s;
+}
 
 @keyframes smokeRise{
   0%{
@@ -668,7 +733,7 @@
   <main id="mainMenu" aria-label="Game selection menu">
     <div class="menu-shell">
         <div class="hub-smoke" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
       <header class="menu-header">
         <p class="menu-kicker">Macroeconomics Review System</p>
