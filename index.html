@@ -292,14 +292,11 @@
   position:relative;
 }
 
-.menu-shell{
-  position:relative;
-  z-index:2;
-}
-.hub-mist{
+#mistCanvas{
   position:fixed;
   inset:0;
-  overflow:hidden;
+  width:100vw;
+  height:100vh;
   pointer-events:none;
   z-index:1;
   mix-blend-mode:screen;
@@ -310,128 +307,9 @@
   z-index:2;
 }
 
-.hub-mist span{
-  position:absolute;
-  left:-45%;
-  width:190%;
-  height:170px;
-  border-radius:50%;
-  background:
-    radial-gradient(ellipse at 18% 48%, rgba(235,245,255,.50), transparent 30%),
-    radial-gradient(ellipse at 42% 60%, rgba(170,205,255,.34), transparent 34%),
-    radial-gradient(ellipse at 70% 42%, rgba(240,245,255,.42), transparent 28%),
-    radial-gradient(ellipse at 88% 58%, rgba(135,175,255,.22), transparent 34%);
-  filter:blur(18px);
-  opacity:.38;
-  animation:
-    mistRoll 42s ease-in-out infinite alternate,
-    mistPulse 9s ease-in-out infinite alternate;
-}
-
-.hub-mist span:nth-child(1){
-  bottom:2%;
-  height:230px;
-  opacity:.68;
-  filter:blur(22px);
-  animation-duration:48s, 7s;
-}
-
-.hub-mist span:nth-child(2){
-  bottom:15%;
-  height:175px;
-  opacity:.52;
-  filter:blur(18px);
-  animation-duration:36s, 11s;
-  animation-delay:-8s, -2s;
-}
-
-.hub-mist span:nth-child(3){
-  bottom:31%;
-  height:135px;
-  opacity:.38;
-  filter:blur(16px);
-  animation-duration:58s, 8s;
-  animation-delay:-19s, -4s;
-}
-
-.hub-mist span:nth-child(4){
-  bottom:49%;
-  height:115px;
-  opacity:.28;
-  filter:blur(20px);
-  animation-duration:44s, 13s;
-  animation-delay:-5s, -6s;
-}
-
-.hub-mist span:nth-child(5){
-  bottom:66%;
-  height:90px;
-  opacity:.22;
-  filter:blur(24px);
-  animation-duration:62s, 10s;
-  animation-delay:-24s, -3s;
-}
-
-.hub-mist span::before,
-.hub-mist span::after{
-  content:"";
-  position:absolute;
-  inset:-30px;
-  border-radius:50%;
-  background:
-    radial-gradient(ellipse at 30% 50%, rgba(245,250,255,.34), transparent 28%),
-    radial-gradient(ellipse at 68% 45%, rgba(180,215,255,.24), transparent 32%);
-  opacity:.55;
-  filter:blur(14px);
-  animation:mistInnerDrift 18s ease-in-out infinite alternate;
-}
-
-.hub-mist span::after{
-  opacity:.38;
-  animation-duration:27s;
-  animation-direction:alternate-reverse;
-}
-
-@keyframes mistRoll{
-  0%{
-    transform:translateX(-6%) translateY(0) scaleX(1);
-  }
-  35%{
-    transform:translateX(4%) translateY(-12px) scaleX(1.06);
-  }
-  70%{
-    transform:translateX(11%) translateY(8px) scaleX(1.12);
-  }
-  100%{
-    transform:translateX(18%) translateY(-4px) scaleX(1.18);
-  }
-}
-
-@keyframes mistPulse{
-  0%{
-    opacity:.28;
-    filter:blur(24px);
-  }
-  45%{
-    opacity:.62;
-    filter:blur(16px);
-  }
-  100%{
-    opacity:.36;
-    filter:blur(26px);
-  }
-}
-
-@keyframes mistInnerDrift{
-  0%{
-    transform:translateX(-8%) scaleX(1);
-  }
-  50%{
-    transform:translateX(7%) scaleX(1.12);
-  }
-  100%{
-    transform:translateX(16%) scaleX(.96);
-  }
+.menu-shell{
+  position:relative;
+  z-index:2;
 }
   
   .game-grid{
@@ -732,10 +610,8 @@
   </button>
 
   <main id="mainMenu" aria-label="Game selection menu">
+    <canvas id="mistCanvas" aria-hidden="true"></canvas>
     <div class="menu-shell">
-      <div class="hub-mist" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
       <header class="menu-header">
         <p class="menu-kicker">Macroeconomics Review System</p>
         <h1 class="menu-title">Choose Your Gauntlet</h1>
@@ -993,6 +869,71 @@ function selectGame(gameKey){
   }
 });
 
+const mistCanvas = document.getElementById("mistCanvas");
+const mistCtx = mistCanvas.getContext("2d");
+
+let mistParticles = [];
+
+function resizeMistCanvas(){
+  mistCanvas.width = window.innerWidth;
+  mistCanvas.height = window.innerHeight;
+  createMistParticles();
+}
+
+function createMistParticles(){
+  mistParticles = [];
+
+  const count = 55;
+
+  for(let i = 0; i < count; i++){
+    mistParticles.push({
+      x: Math.random() * mistCanvas.width,
+      y: mistCanvas.height * (0.35 + Math.random() * 0.7),
+      r: 80 + Math.random() * 220,
+      vx: 0.12 + Math.random() * 0.38,
+      vy: -0.02 + Math.random() * 0.04,
+      alpha: 0.04 + Math.random() * 0.13,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: 0.003 + Math.random() * 0.008
+    });
+  }
+}
+
+function drawMist(){
+  mistCtx.clearRect(0, 0, mistCanvas.width, mistCanvas.height);
+
+  for(const p of mistParticles){
+    p.x += p.vx;
+    p.y += p.vy;
+    p.pulse += p.pulseSpeed;
+
+    const breathing = 0.75 + Math.sin(p.pulse) * 0.25;
+    const radius = p.r * breathing;
+
+    const gradient = mistCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius);
+    gradient.addColorStop(0, `rgba(220,235,255,${p.alpha})`);
+    gradient.addColorStop(0.45, `rgba(150,190,255,${p.alpha * 0.45})`);
+    gradient.addColorStop(1, "rgba(150,190,255,0)");
+
+    mistCtx.fillStyle = gradient;
+    mistCtx.beginPath();
+    mistCtx.ellipse(p.x, p.y, radius * 1.8, radius * 0.38, 0, 0, Math.PI * 2);
+    mistCtx.fill();
+
+    if(p.x - radius > mistCanvas.width){
+      p.x = -radius * 2;
+      p.y = mistCanvas.height * (0.35 + Math.random() * 0.7);
+      p.r = 80 + Math.random() * 220;
+      p.alpha = 0.04 + Math.random() * 0.13;
+    }
+  }
+
+  requestAnimationFrame(drawMist);
+}
+
+window.addEventListener("resize", resizeMistCanvas);
+resizeMistCanvas();
+drawMist();
  
 </script>
 </body>
