@@ -288,44 +288,60 @@
     letter-spacing:.04em;
   }
 
-  .menu-smoke{
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  pointer-events:none;
-  z-index:0;
+#mainMenu{
+  position:relative;
 }
 
-.splash-enter,
-.splash-status{
+.menu-shell{
+  position:relative;
   z-index:2;
 }
 
-.menu-smoke span{
+.hub-smoke{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:1;
+}
+
+.hub-smoke span{
   position:absolute;
-  bottom:-140px;
-  width:220px;
-  height:220px;
+  bottom:-180px;
+  width:260px;
+  height:260px;
   border-radius:50%;
-  background:radial-gradient(circle, rgba(210,225,255,.18), rgba(160,180,220,.08) 42%, transparent 72%);
-  filter:blur(20px);
+  background:radial-gradient(circle, rgba(190,210,255,.22), rgba(130,160,220,.10) 42%, transparent 72%);
+  filter:blur(16px);
   opacity:0;
-  animation:smokeRise 16s linear infinite;
+  animation:hubSmokeRise 18s linear infinite;
 }
 
-.menu-smoke span:nth-child(1){left:8%; animation-delay:0s;}
-.menu-smoke span:nth-child(2){left:25%; animation-delay:4s; width:260px; height:260px;}
-.menu-smoke span:nth-child(3){left:46%; animation-delay:8s;}
-.menu-smoke span:nth-child(4){left:66%; animation-delay:2s; width:280px; height:280px;}
-.menu-smoke span:nth-child(5){left:84%; animation-delay:6s;}
+.hub-smoke span:nth-child(1){left:5%; animation-delay:0s;}
+.hub-smoke span:nth-child(2){left:18%; animation-delay:5s; width:320px; height:320px;}
+.hub-smoke span:nth-child(3){left:36%; animation-delay:9s;}
+.hub-smoke span:nth-child(4){left:55%; animation-delay:2s; width:340px; height:340px;}
+.hub-smoke span:nth-child(5){left:72%; animation-delay:7s;}
+.hub-smoke span:nth-child(6){left:88%; animation-delay:12s; width:300px; height:300px;}
 
-@keyframes smokeRise{
-  0%{transform:translateY(0) scale(.7); opacity:0;}
-  15%{opacity:.32;}
-  70%{opacity:.20;}
-  100%{transform:translateY(-120vh) scale(1.8); opacity:0;}
+@keyframes hubSmokeRise{
+  0%{
+    transform:translateY(0) translateX(0) scale(.7);
+    opacity:0;
+  }
+  15%{
+    opacity:.42;
+  }
+  55%{
+    transform:translateY(-55vh) translateX(35px) scale(1.25);
+    opacity:.24;
+  }
+  100%{
+    transform:translateY(-115vh) translateX(-25px) scale(1.9);
+    opacity:0;
+  }
 }
-
+  
   .game-grid{
     display:grid;
     grid-template-columns:repeat(4, minmax(0, 1fr));
@@ -613,10 +629,6 @@
 
 <body>
   <section id="splashScreen" aria-label="Macro Test Prep splash screen">
-    <div class="menu-smoke" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
-  </div>
-
   <button id="enterHubButton" class="splash-enter" onclick="enterHub()">Click to Enter</button>
   <div class="splash-status" id="splashStatus">Initializing adaptive gauntlet...</div>
 </section>
@@ -629,6 +641,9 @@
 
   <main id="mainMenu" aria-label="Game selection menu">
     <div class="menu-shell">
+        <div class="hub-smoke" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
       <header class="menu-header">
         <p class="menu-kicker">Macroeconomics Review System</p>
         <h1 class="menu-title">Choose Your Gauntlet</h1>
