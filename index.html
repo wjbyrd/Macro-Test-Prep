@@ -894,13 +894,13 @@ function makeMistDot(randomX = false){
   return {
     x: randomX ? Math.random() * window.innerWidth : -120 - Math.random() * 400,
     y: window.innerHeight * (0.38 + Math.random() * 0.58),
-    r: 8 + Math.random() * 34,
+    r: 18 + Math.random() * 55,
     vx: 0.045 + Math.random() * 0.16,
     vy: -0.006 + Math.random() * 0.012,
     alpha: 0.024 + Math.random() * 0.07,
     life: Math.random() * Math.PI * 2,
     pulse: 0.001 + Math.random() * 0.006,
-    flatness: 0.16 + Math.random() * 0.28,
+    flatness: 0.24 + Math.random() * 0.34,
     drift: (Math.random() - 0.5) * 0.08
   };
   
@@ -912,9 +912,32 @@ function makeMistDot(randomX = false){
 return dot;
 }
 
+function drawMistVeil(){
+  mistCtx.save();
+  mistCtx.globalCompositeOperation = "lighter";
+
+  for(let i = 0; i < 7; i++){
+    const y = window.innerHeight * (0.42 + i * 0.075);
+    const g = mistCtx.createLinearGradient(0, y, window.innerWidth, y);
+
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(0.18, "rgba(220,235,255,0.035)");
+    g.addColorStop(0.48, "rgba(255,255,255,0.055)");
+    g.addColorStop(0.78, "rgba(200,225,255,0.035)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+
+    mistCtx.fillStyle = g;
+    mistCtx.filter = "blur(22px)";
+    mistCtx.fillRect(0, y - 28, window.innerWidth, 70);
+  }
+
+  mistCtx.restore();
+}
+  
 function drawMist(){
   mistCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   mistCtx.globalCompositeOperation = "lighter";
+  drawMistVeil();
 
   for(const p of mistDots){
     p.x += p.vx;
@@ -935,7 +958,7 @@ function drawMist(){
     mistCtx.ellipse(
       p.x,
       p.y,
-      p.r * (1.15 + breathe * 0.55),
+      p.r * (2.2 + breathe * 1.1),
       p.r * p.flatness,
       Math.sin(p.life) * 0.08,
       0,
