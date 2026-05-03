@@ -917,7 +917,7 @@ function drawMistVeil(){
   mistCtx.globalCompositeOperation = "lighter";
 
   for(let i = 0; i < 7; i++){
-    const y = window.innerHeight * (0.68 + Math.random() * 0.28),
+    const y = window.innerHeight * (0.68 + Math.random() * 0.28);
     const g = mistCtx.createLinearGradient(0, y, window.innerWidth, y);
 
     g.addColorStop(0, "rgba(255,255,255,0)");
