@@ -881,7 +881,7 @@ function resizeMistCanvas(){
 
 function buildMist(){
   mistDots = [];
-  const count = 260;
+  const count = 520;
 
   for(let i = 0; i < count; i++){
     mistDots.push(makeMistDot(true));
@@ -894,13 +894,13 @@ function makeMistDot(randomX = false){
   return {
     x: randomX ? Math.random() * window.innerWidth : -120 - Math.random() * 400,
     y: window.innerHeight * (0.18 + Math.random() * 0.82),
-    r: 14 + Math.random() * 58,
-    vx: 0.08 + Math.random() * 0.24,
+    r: 8 + Math.random() * 34,
+    vx: 0.045 + Math.random() * 0.16,
     vy: -0.006 + Math.random() * 0.012,
-    alpha: 0.04 + Math.random() * 0.12,
+    alpha: 0.018 + Math.random() * 0.055,
     life: Math.random() * Math.PI * 2,
     pulse: 0.001 + Math.random() * 0.006,
-    flatness: 0.22 + Math.random() * 0.42,
+    flatness: 0.16 + Math.random() * 0.28,
     drift: (Math.random() - 0.5) * 0.08
   };
 }
@@ -919,16 +919,16 @@ function drawMist(){
 
     const g = mistCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
       g.addColorStop(0, `rgba(255,255,255,${alpha})`);
-      g.addColorStop(0.38, `rgba(225,238,255,${alpha * 0.72})`);
-      g.addColorStop(0.78, `rgba(170,205,255,${alpha * 0.24})`);
-      g.addColorStop(1, `rgba(170,205,255,0)`);
+      g.addColorStop(0.30, `rgba(230,240,255,${alpha * 0.65})`);
+      g.addColorStop(0.65, `rgba(185,215,255,${alpha * 0.22})`);
+      g.addColorStop(1, `rgba(185,215,255,0)`);
 
     mistCtx.fillStyle = g;
     mistCtx.beginPath();
     mistCtx.ellipse(
       p.x,
       p.y,
-      p.r * (1.6 + breathe),
+      p.r * (1.15 + breathe * 0.55),
       p.r * p.flatness,
       Math.sin(p.life) * 0.08,
       0,
