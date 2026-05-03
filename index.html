@@ -308,71 +308,45 @@
 .hub-smoke span{
   position:absolute;
   bottom:-260px;
-  width:34px;
+  width:140px;
   height:760px;
   opacity:0;
-  filter:blur(10px);
+  filter:blur(8px);
   background:
-    linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(230,240,255,.00) 8%,
-      rgba(230,240,255,.38) 18%,
-      rgba(170,205,255,.24) 38%,
-      rgba(230,240,255,.32) 58%,
-      rgba(150,190,255,.16) 76%,
-      transparent 100%
-    );
-  border-radius:999px;
+    radial-gradient(ellipse at 48% 20%, rgba(235,245,255,.55) 0%, transparent 18%),
+    radial-gradient(ellipse at 56% 36%, rgba(190,220,255,.38) 0%, transparent 16%),
+    radial-gradient(ellipse at 42% 54%, rgba(230,240,255,.32) 0%, transparent 15%),
+    linear-gradient(88deg, transparent 40%, rgba(220,235,255,.34) 48%, rgba(220,235,255,.10) 52%, transparent 60%);
+  border-radius:50%;
   transform-origin:center bottom;
-  animation:hubSmokeStringRise 18s ease-in-out infinite;
+  animation:smokeWispRise 19s ease-in-out infinite;
 }
 
-.hub-smoke span::before,
-.hub-smoke span::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  border-radius:999px;
-  background:inherit;
-  opacity:.75;
-}
+.hub-smoke span:nth-child(1){left:6%; animation-delay:0s;}
+.hub-smoke span:nth-child(2){left:20%; animation-delay:3s; transform:scale(.85);}
+.hub-smoke span:nth-child(3){left:36%; animation-delay:6s;}
+.hub-smoke span:nth-child(4){left:52%; animation-delay:1.5s; transform:scale(1.1);}
+.hub-smoke span:nth-child(5){left:70%; animation-delay:5s;}
+.hub-smoke span:nth-child(6){left:86%; animation-delay:8s; transform:scale(.9);}
 
-.hub-smoke span::before{
-  transform:translateX(-22px) rotate(-7deg) scaleX(.45);
-}
-
-.hub-smoke span::after{
-  transform:translateX(24px) rotate(9deg) scaleX(.35);
-}
-
-.hub-smoke span:nth-child(1){left:7%; animation-delay:0s;}
-.hub-smoke span:nth-child(2){left:20%; animation-delay:3s; height:820px;}
-.hub-smoke span:nth-child(3){left:35%; animation-delay:6s;}
-.hub-smoke span:nth-child(4){left:52%; animation-delay:1.5s; height:880px;}
-.hub-smoke span:nth-child(5){left:69%; animation-delay:5s;}
-.hub-smoke span:nth-child(6){left:86%; animation-delay:8s; height:840px;}
-
-@keyframes hubSmokeStringRise{
+@keyframes smokeWispRise{
   0%{
-    transform:translateY(0) translateX(0) scaleX(.45) rotate(-3deg);
+    transform:translateY(0) translateX(0) scale(.7) skewX(-8deg);
     opacity:0;
   }
-  8%{
-    opacity:.82;
+  12%{
+    opacity:.72;
   }
-  40%{
-    transform:translateY(-42vh) translateX(42px) scaleX(.75) rotate(5deg);
-    opacity:.58;
+  38%{
+    transform:translateY(-38vh) translateX(24px) scale(.92) skewX(10deg);
+    opacity:.48;
   }
-  70%{
-    transform:translateY(-78vh) translateX(-26px) scaleX(1.05) rotate(-6deg);
-    opacity:.32;
+  68%{
+    transform:translateY(-76vh) translateX(-18px) scale(1.08) skewX(-12deg);
+    opacity:.28;
   }
   100%{
-    transform:translateY(-125vh) translateX(30px) scaleX(1.35) rotate(8deg);
+    transform:translateY(-118vh) translateX(28px) scale(1.22) skewX(14deg);
     opacity:0;
   }
 }
