@@ -443,7 +443,7 @@
 
   .engine{--accent:#f7ca18;}
   .mint{--accent:#f97316;}
-  .dominion{--accent:#ef4444;}
+  .citadel{--accent:#5f0fc6;}
   .nexus{--accent:#0a70d6;}
 
   .game-card::before{
@@ -463,7 +463,7 @@
   .engine .game-thumb{background-image:url('tne_thumbnail.png');}
   .mint .game-thumb{background-image:url('mag_thumbnail.png');}
   .nexus .game-thumb{background-image:url('cn_thumbnail.png');}
-  .dominion .game-thumb{background-image:url('dop_thumbnail.png');}
+  .citadel .game-thumb{background-image:url('tec_thumbnail.png');}
   
   #emailModal{
     position:fixed;
@@ -685,23 +685,23 @@
       </div>
     </article>
 
-        <article class="game-card dominion">
-          <div class="game-thumb" aria-hidden="true"></div>
-          <div class="game-content">
-            <h2 class="game-title">Dominion of Power</h2>
-            <p class="game-tagline">Confront market power: monopoly, welfare, and the imperfect worlds where efficiency starts to crack.</p>
-            <div class="topic-list">
-              <span class="topic-chip">General Equilibrium</span>
-              <span class="topic-chip">Welfare</span>
-              <span class="topic-chip">Monopoly</span>
-              <span class="topic-chip">Imperfect Competition</span>
-            </div>
-            <div class="game-meta">
-              <div class="status-line"><span>Status</span><span class="status-value" id="status-dominion">Ready</span></div>
-              <button class="enter-btn" onclick="selectGame('dominion')">Enter Dominion</button>
-            </div>
-          </div>
-        </article>
+<article class="game-card citadel">
+  <div class="game-thumb" aria-hidden="true"></div>
+  <div class="game-content">
+    <h2 class="game-title">The Exchange Citadel</h2>
+    <p class="game-tagline">Enter the open economy: trace trade balances, exchange rates, capital flows, and global policy pressure.</p>
+    <div class="topic-list">
+      <span class="topic-chip">Open Economy</span>
+      <span class="topic-chip">Exchange Rates</span>
+      <span class="topic-chip">Trade Balance</span>
+      <span class="topic-chip">Mundell-Fleming</span>
+    </div>
+    <div class="game-meta">
+      <div class="status-line"><span>Status</span><span class="status-value" id="status-citadel">Ready</span></div>
+      <button class="enter-btn" onclick="selectGame('citadel')">Enter Citadel</button>
+    </div>
+  </div>
+</article>
 
       </section>
     </div>
@@ -794,10 +794,10 @@
      file: "https://wjbyrd.github.io/The-Command-Nexus/",
      statusKey: "macroHub_nexus_complete"
     },
-    dominion: {
-      title: "Dominion of Power",
-      file: "https://wjbyrd.github.io/Dominion-of-Power/",
-      statusKey: "macroHub_dominion_complete"
+    citadel: {
+      title: "The Exchange Citadel",
+      file: "https://wjbyrd.github.io/The-Exchange-Citadel/",
+      statusKey: "macroHub_citadel_complete"
     },
 
   };
