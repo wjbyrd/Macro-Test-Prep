@@ -444,7 +444,7 @@
   .engine{--accent:#f7ca18;}
   .mint{--accent:#f97316;}
   .dominion{--accent:#ef4444;}
-  .vault{--accent:#22d3ee;}
+  .nexus{--accent:#0a70d6;}
 
   .game-card::before{
     content:"";
@@ -462,9 +462,9 @@
 
   .engine .game-thumb{background-image:url('tne_thumbnail.png');}
   .mint .game-thumb{background-image:url('mag_thumbnail.png');}
+  .nexus .game-thumb{background-image:url('cn_thumbnail.png');}
   .dominion .game-thumb{background-image:url('dop_thumbnail.png');}
-  .vault .game-thumb{background-image:url('sv_thumbnail.png');}
-
+  
   #emailModal{
     position:fixed;
     inset:0;
@@ -667,23 +667,23 @@
       </div>
     </article>
         
-        <article class="game-card foundry">
-          <div class="game-thumb" aria-hidden="true"></div>
-          <div class="game-content">
-            <h2 class="game-title">The Foundry</h2>
-            <p class="game-tagline">Run the firm: manage production, control costs, and decide when competition makes profit possible.</p>
-            <div class="topic-list">
-              <span class="topic-chip">Production</span>
-              <span class="topic-chip">Profit Maximization</span>
-              <span class="topic-chip">Costs</span>
-              <span class="topic-chip">Perfect Competition</span>
-            </div>
-            <div class="game-meta">
-              <div class="status-line"><span>Status</span><span class="status-value" id="status-foundry">Ready</span></div>
-              <button class="enter-btn" onclick="selectGame('foundry')">Enter Foundry</button>
-            </div>
-          </div>
-        </article>
+    <article class="game-card nexus">
+      <div class="game-thumb" aria-hidden="true"></div>
+      <div class="game-content">
+        <h2 class="game-title">The Command Nexus</h2>
+        <p class="game-tagline">Stabilize the economy: trace IS-LM, direct policy responses, and follow aggregate demand through shocks.</p>
+        <div class="topic-list">
+        <span class="topic-chip">IS-LM</span>
+        <span class="topic-chip">Fiscal Policy</span>
+        <span class="topic-chip">Monetary Policy</span>
+        <span class="topic-chip">Aggregate Demand</span>
+        </div>
+        <div class="game-meta">
+        <div class="status-line"><span>Status</span><span class="status-value" id="status-nexus">Ready</span></div>
+        <button class="enter-btn" onclick="selectGame('nexus')">Enter Nexus</button>
+        </div>
+      </div>
+    </article>
 
         <article class="game-card dominion">
           <div class="game-thumb" aria-hidden="true"></div>
@@ -782,23 +782,24 @@
     engine: {
       title: "The National Engine",
       file: "https://wjbyrd.github.io/The-National-Engine/",
-      statusKey: "microHub_engine_complete"
+      statusKey: "macroHub_engine_complete"
     },
     mint: {
       title: "The Mint of Ash and Gold",
       file: "https://wjbyrd.github.io/The-Mint-of-Ash-and-Gold/",
-      statusKey: "microHub_mint_complete"
+      statusKey: "macroHub_mint_complete"
     },
+    nexus: {
+     title: "The Command Nexus",
+     file: "https://wjbyrd.github.io/The-Command-Nexus/",
+     statusKey: "macroHub_nexus_complete"
+    }
     dominion: {
       title: "Dominion of Power",
       file: "https://wjbyrd.github.io/Dominion-of-Power/",
       statusKey: "macroHub_dominion_complete"
     },
-    vault: {
-      title: "Strategic Vault",
-      file: "https://wjbyrd.github.io/The-Strategic-Vault/",
-      statusKey: "macroHub_vault_complete"
-    }
+
   };
 
   let selectedGame = null;
