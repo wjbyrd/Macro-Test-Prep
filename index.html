@@ -707,7 +707,7 @@
       <div class="realm-status-label">Realm Status</div>
       <div id="realmStatusText" class="realm-status-text">0 of 4 systems restored</div>
       <div id="realmStatusSubtext" class="realm-status-subtext">
-        The macro realm remains unstable. Complete each mission to restore balance across the system.
+        The Macro Realm remains unstable. Complete each mission to restore balance across the system.
       </div>
     </div>
       </header>
@@ -996,26 +996,26 @@
 
     if(realmSubtext){
       if(restoredCount === totalMissions){
-        realmSubtext.innerText = "The macro system is stabilized. All major systems have been restored.";
+        realmSubtext.innerText = "The Macro Realm is stabilized. All major systems have been restored.";
       } else if(restoredCount > 0 && contestedCount > 0){
         realmSubtext.innerText =
           `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored, ` +
-          `${contestedCount} ${pluralize(contestedCount, "gauntlet", "gauntlets")} contested. Continue gauntlets to stabilize the system.`;
+          `${contestedCount} ${pluralize(contestedCount, "system", "systems")} contested. Continue missions to stabilize the Realm.`;
       } else if(restoredCount > 0){
         realmSubtext.innerText =
-          `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored. Continue gauntlets to stabilize the system.`;
+          `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored. Continue missions to stabilize the Realm.`;
       } else if(contestedCount > 0){
         realmSubtext.innerText =
-          `${contestedCount} ${pluralize(contestedCount, "gauntlet", "gauntlets")} contested. Complete the active gauntlet to restore its system.`;
+          `${contestedCount} ${pluralize(contestedCount, "system", "systems")} contested. Complete the active mission to restore its system.`;
       } else {
-        realmSubtext.innerText = "The macro system remains unstable. Complete gauntlets to restore each system.";
+        realmSubtext.innerText = "The Macro Realm remains unstable. Complete missions to restore each system.";
       }
     }
   }
 
   function selectGame(gameKey){
     if(!games[gameKey]){
-      alert("Select a gauntlet first.");
+      alert("Select a mission first.");
       return;
     }
 
