@@ -828,10 +828,6 @@
 
   <button id="soundToggle" class="sound-toggle" onclick="toggleMenuMusic()" aria-label="Toggle menu music">Sound Off</button>
 
-  <button id="helpButton" class="help-button" onclick="openHelpModal()" aria-label="Open instructions">
-    How This Works
-  </button>
-
   <button id="macroMenuButton" class="macro-menu-button" onclick="openMacroMenu()" aria-label="Open macro menu">
     Macro Menu
   </button>
@@ -958,31 +954,6 @@
       </section>
     </div>
   </main>
-
-  <section id="helpModal" aria-label="Instructions dialog">
-    <div class="help-modal-card">
-      <div class="help-modal-header">
-        <h2 class="help-modal-title">How This Works</h2>
-        <button class="help-close-btn" onclick="closeHelpModal()" aria-label="Close instructions">Close ×</button>
-      </div>
-
-      <div class="help-modal-body">
-        <p>Choose a mission to begin reviewing.</p>
-
-        <p>Each mission focuses on a different part of the course and adapts to your performance as you play.</p>
-
-        <ul>
-          <li>Correct answers move you forward.</li>
-          <li>Missed questions may send you back or trigger review.</li>
-          <li>Boss rooms check whether you are ready to advance.</li>
-          <li>Completion is reported when you finish a mission</li>
-          <li>Progress is saved at your current room. You can close the browser and pick up where you last were.</li>
-        </ul>
-
-        <p>When you enter a mission, use your school email on that game’s start screen so your progress can be recorded.</p>
-      </div>
-    </div>
-  </section>
 
   <section id="macroMenuModal" class="macro-menu-modal" aria-label="Macro menu dialog">
     <div class="macro-menu-card">
@@ -1293,7 +1264,6 @@
     document.getElementById("splashScreen").classList.add("hidden");
     document.getElementById("mainMenu").classList.add("active");
     showSoundToggle();
-    showHelpButton();
     showMacroMenuButton();
     startMenuMusic();
   }
@@ -1303,14 +1273,6 @@
     const input = document.getElementById("hubEmailInput");
     if(input && savedEmail){ input.value = savedEmail; }
   }
-
-  function showHelpButton(){
-    const button = document.getElementById("helpButton");
-    if(button){ button.classList.add("visible"); }
-  }
-
-  function openHelpModal(){ document.getElementById("helpModal").classList.add("active"); }
-  function closeHelpModal(){ document.getElementById("helpModal").classList.remove("active"); }
 
   function showMacroMenuButton(){
     const button = document.getElementById("macroMenuButton");
@@ -1604,7 +1566,6 @@
   document.addEventListener("keydown", event => {
     if(event.key === "Escape"){
       const artifactModal = document.getElementById("artifactDetailModal");
-      const helpModal = document.getElementById("helpModal");
       const macroModal = document.getElementById("macroMenuModal");
       if(artifactModal && artifactModal.classList.contains("active")){ closeArtifactModal(); return; }
       if(helpModal && helpModal.classList.contains("active")){ closeHelpModal(); return; }
