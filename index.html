@@ -817,6 +817,81 @@
   .macro-menu-card{padding:20px;}
 }
 
+
+
+/* =========================================================
+   MOBILE SCROLL FIX — MACRO TEST PREP
+   Keeps the hub menu scrollable on phones and prevents the
+   fixed splash/menu layout from trapping content off-screen.
+   ========================================================= */
+html,
+body{
+  width:100%;
+  min-height:100%;
+}
+
+body{
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+
+#mainMenu{
+  min-height:100dvh;
+  height:100dvh;
+  overflow-y:auto !important;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+}
+
+@media (max-width: 768px){
+  #mainMenu{
+    padding:18px 16px 24px;
+  }
+
+  .menu-header{
+    margin-bottom:18px;
+  }
+
+  .briefing-folder{
+    margin-top:18px;
+  }
+
+  .briefing-folder-header{
+    padding:14px 15px;
+  }
+
+  .briefing-folder-title{
+    font-size:17px;
+  }
+
+  .briefing-folder-subtext{
+    font-size:12px;
+  }
+
+  .briefing-folder-toggle{
+    padding:7px 10px;
+  }
+
+  .game-card.restored .game-thumb::before,
+  .game-card.contested .game-thumb::before,
+  .game-card.unstable .game-thumb::before,
+  .game-card.locked .game-thumb::before{
+    top:10px;
+    right:10px;
+    font-size:9px;
+    padding:6px 8px;
+  }
+}
+
+.status-value[data-realm-state="locked"]{
+  color:rgba(255,255,255,.48);
+}
+
+
+.recovery-message.success{ color:#fbbf24; }
+.recovery-message.error{ color:#f87171; }
+
 </style>
 </head>
 
@@ -1294,42 +1369,50 @@
     if(panelId === "macroLogPanel"){ renderMacroLog(); }
     if(panelId === "artifactVaultPanel"){ renderArtifactVault(); }
   }
+function getHubSave(){
+  const defaultSave = {
+    version: 1,
+    player: {
+      email: localStorage.getItem("gauntletEmail") || "",
+      pseudonym: localStorage.getItem("gauntletUser") || ""
+    },
+    missions: {},
+    log: [],
+    settings: {
+      soundOn: localStorage.getItem("macroHub_soundOn") === "true"
+    },
+    lastUpdated: null
+  };
 
-  function getHubSave(){
-    try { return JSON.parse(localStorage.getItem(HUB_SAVE_KEY) || '{"missions":{},"log":[]}'); }
-    catch(error){ return { missions:{}, log:[] }; }
+  try{
+    const saved = JSON.parse(localStorage.getItem(HUB_SAVE_KEY));
+    return saved ? {...defaultSave, ...saved, missions: saved.missions || {}, log: saved.log || []} : defaultSave;
+  } catch(error){
+    console.warn("Macro hub save could not be read:", error);
+    return defaultSave;
   }
+}
+function setHubSave(save){
+  save.lastUpdated = new Date().toISOString();
+  localStorage.setItem(HUB_SAVE_KEY, JSON.stringify(save));
+}
+function recordMissionProgress(gameKey, details = {}
+function syncHubSaveFromExistingKeys(){
+  Object.keys(games).forEach(key => {
+    const game = games[key];
+    const completed = getStorageFlag(game.statusKey);
+    const started = getStorageFlag(game.startedKey);
+    const room = localStorage.getItem(game.roomKey);
 
-  function setHubSave(save){ localStorage.setItem(HUB_SAVE_KEY, JSON.stringify(save)); }
-
-  function recordMissionProgress(gameKey, details = {}){
-    const game = games[gameKey];
-    if(!game) return;
-    const save = getHubSave();
-    save.missions = save.missions || {};
-    save.log = save.log || [];
-    save.missions[gameKey] = {
-      started: details.started ?? getStorageFlag(game.startedKey),
-      completed: details.completed ?? getStorageFlag(game.statusKey),
-      room: details.room ?? localStorage.getItem(game.roomKey) ?? null,
-      updatedAt: Date.now()
-    };
-    if(details.logMessage){
-      save.log.unshift({ mission: game.title, message: details.logMessage, timestamp: Date.now() });
-      save.log = save.log.slice(0, 30);
+    if(completed || started || room){
+      recordMissionProgress(key, {
+        started,
+        completed,
+        room: room || null
+      });
     }
-    setHubSave(save);
-  }
-
-  function syncHubSaveFromExistingKeys(){
-    Object.keys(games).forEach(key => {
-      const game = games[key];
-      const completed = getStorageFlag(game.statusKey);
-      const started = getStorageFlag(game.startedKey);
-      const room = localStorage.getItem(game.roomKey);
-      if(completed || started || room){ recordMissionProgress(key, { started, completed, room }); }
-    });
-  }
+  });
+}
 
   function toggleBriefingFolder(){
     const folder = document.getElementById("briefingFolder");
@@ -1368,98 +1451,160 @@
 
   function pluralize(count, singular, plural){ return count === 1 ? singular : plural; }
   function getStorageFlag(key){ return localStorage.getItem(key) === "true"; }
+function updateGameStatuses(){
+  let restoredCount = 0;
+  let contestedCount = 0;
+  const sortedKeys = getSortedMissionKeys();
+  const totalMissions = sortedKeys.length;
 
-  function updateGameStatuses(){
-    let restoredCount = 0;
-    let contestedCount = 0;
-    const sortedKeys = getSortedMissionKeys();
-    const totalMissions = sortedKeys.length;
+  sortedKeys.forEach(key => {
+    const statusElement = document.getElementById("status-" + key);
+    const card = statusElement ? statusElement.closest(".game-card") : document.querySelector(".game-card." + key);
+    const game = games[key];
+    if(!game) return;
 
-    sortedKeys.forEach(key => {
-      const statusElement = document.getElementById("status-" + key);
-      const card = statusElement ? statusElement.closest(".game-card") : document.querySelector(".game-card." + key);
-      if(card){ card.classList.remove("restored", "contested", "unstable", "locked"); }
-      if(!statusElement) return;
+    const completed = getStorageFlag(game.statusKey);
+    const started = getStorageFlag(game.startedKey);
+    const room = localStorage.getItem(game.roomKey);
+    const unlocked = isMissionUnlocked(key);
+    const badge = document.getElementById("badge-" + key);
+    const briefing = document.getElementById("briefing-" + key);
+    const enterButton = card ? card.querySelector(".enter-btn") : null;
 
-      const game = games[key];
-      const completed = getStorageFlag(game.statusKey);
-      const started = getStorageFlag(game.startedKey);
-      const room = localStorage.getItem(game.roomKey);
-      const unlocked = isMissionUnlocked(key);
+    if(card){
+      card.classList.remove("restored", "contested", "unstable", "locked");
+      card.classList.toggle("locked", !unlocked && !completed);
+    }
 
-      if(completed){
-        statusElement.innerText = game.restoredText || "Restored";
-        statusElement.dataset.realmState = "restored";
-        if(card){ card.classList.add("restored"); }
-        restoredCount++;
-      } else if(!unlocked){
-        statusElement.innerText = game.lockedText || "Locked";
-        statusElement.dataset.realmState = "locked";
-        if(card){ card.classList.add("locked"); }
-      } else if(started){
-        statusElement.innerText = room ? `${game.contestedText || "Contested"} · Room ${room}` : (game.contestedText || "Contested");
-        statusElement.dataset.realmState = "contested";
-        if(card){ card.classList.add("contested"); }
-        contestedCount++;
-      } else {
-        statusElement.innerText = game.unstableText || "Ready";
-        statusElement.dataset.realmState = "unstable";
-        if(card){ card.classList.add("unstable"); }
-      }
-    });
+    if(enterButton){
+      enterButton.disabled = !unlocked && !completed;
+      enterButton.innerText = (unlocked || completed) ? (game.buttonText || "Enter Mission") : (game.lockedText || "Locked");
+    }
 
-    updateBriefingSummary(restoredCount, contestedCount, totalMissions);
-    updateMacroNarrative(restoredCount, contestedCount, totalMissions);
+    if(!statusElement) return;
+
+    if(completed){
+      statusElement.innerText = game.restoredText || "Restored";
+      statusElement.dataset.realmState = "restored";
+      if(card){ card.classList.add("restored"); }
+      if(badge){ badge.innerText = game.artifactText || "Artifacts secured · System restored"; }
+      if(briefing){ briefing.innerText = game.storyRestored || "System restored."; }
+      restoredCount++;
+    } else if(!unlocked){
+      statusElement.innerText = game.lockedText || "Locked";
+      statusElement.dataset.realmState = "locked";
+      if(card){ card.classList.add("locked"); }
+      if(badge){ badge.innerText = ""; }
+      if(briefing){ briefing.innerText = "Restore the previous system before entering this mission."; }
+    } else if(started){
+      statusElement.innerText = room ? `${game.contestedText || "Contested"} · Room ${room}` : (game.contestedText || "Contested");
+      statusElement.dataset.realmState = "contested";
+      if(card){ card.classList.add("contested"); }
+      if(badge){ badge.innerText = ""; }
+      if(briefing){ briefing.innerText = game.storyActive || "Mission active."; }
+      contestedCount++;
+    } else {
+      statusElement.innerText = game.unstableText || "Ready";
+      statusElement.dataset.realmState = "unstable";
+      if(card){ card.classList.add("unstable"); }
+      if(badge){ badge.innerText = ""; }
+      if(briefing){ briefing.innerText = game.storyIntro || "Mission awaiting restoration."; }
+    }
+  });
+
+  updateBriefingSummary(restoredCount, contestedCount, totalMissions);
+  updateMacroNarrative(restoredCount, contestedCount, totalMissions);
+  renderArtifactVault();
+}
+function updateBriefingSummary(restoredCount, contestedCount, totalMissions){
+  const title = document.getElementById("briefingFolderTitle");
+  const subtext = document.getElementById("briefingFolderSubtext");
+  const nextTitle = document.getElementById("nextMissionTitle");
+  const nextReason = document.getElementById("nextMissionReason");
+  const nextButton = document.getElementById("nextMissionButton");
+
+  nextMissionKey = getSortedMissionKeys().find(key => !getStorageFlag(games[key].statusKey)) || null;
+
+  if(title){
+    title.innerText = `${restoredCount} of ${totalMissions} ${pluralize(totalMissions, "system", "systems")} restored`;
   }
 
-  function updateBriefingSummary(restoredCount, contestedCount, totalMissions){
-    const title = document.getElementById("briefingFolderTitle");
-    const subtext = document.getElementById("briefingFolderSubtext");
-    const nextTitle = document.getElementById("nextMissionTitle");
-    const nextReason = document.getElementById("nextMissionReason");
-    const nextButton = document.getElementById("nextMissionButton");
-    nextMissionKey = getSortedMissionKeys().find(key => !getStorageFlag(games[key].statusKey)) || null;
-    if(title){ title.innerText = `${restoredCount} of ${totalMissions} ${pluralize(totalMissions, "system", "systems")} restored`; }
-    if(!nextMissionKey){
-      if(subtext){ subtext.innerText = "All systems restored"; }
-      if(nextTitle){ nextTitle.innerText = "Macro Realm Stabilized"; }
-      if(nextReason){ nextReason.innerText = "Every major macro system has been restored. The Realm is stable."; }
-      if(nextButton){ nextButton.innerText = "No Mission Remaining"; nextButton.disabled = true; }
-      return;
-    }
-    const nextGame = games[nextMissionKey];
-    if(subtext){ subtext.innerText = `Next Mission: ${nextGame.title}`; }
-    if(nextTitle){ nextTitle.innerText = nextGame.title; }
+  if(!nextMissionKey){
+    if(subtext){ subtext.innerText = "All systems restored"; }
+    if(nextTitle){ nextTitle.innerText = "Macro Realm Stabilized"; }
+    if(nextReason){ nextReason.innerText = "Every major macro system has been restored. The Realm is stable."; }
+    if(nextButton){ nextButton.innerText = "No Mission Remaining"; nextButton.disabled = true; }
+    return;
+  }
+
+  const nextGame = games[nextMissionKey];
+  const started = getStorageFlag(nextGame.startedKey);
+  const room = localStorage.getItem(nextGame.roomKey);
+
+  if(subtext){ subtext.innerText = `Next Mission: ${nextGame.title}`; }
+  if(nextTitle){ nextTitle.innerText = nextGame.title; }
+
+  if(started && room){
+    if(nextReason){ nextReason.innerText = `${nextGame.contestedText || "Mission active"} · Continue from Room ${room}.`; }
+    if(nextButton){ nextButton.innerText = "Continue Mission"; nextButton.disabled = false; }
+  } else {
     if(nextReason){ nextReason.innerText = nextGame.nextReason || "Begin the next available mission."; }
     if(nextButton){ nextButton.innerText = "Begin Next Mission"; nextButton.disabled = false; }
   }
+}
+function updateMacroNarrative(restoredCount, contestedCount, totalMissions){
+  const narrative = document.getElementById("macroNarrativeText");
+  if(!narrative) return;
 
-  function updateMacroNarrative(restoredCount, contestedCount, totalMissions){
-    const narrative = document.getElementById("macroNarrativeText");
-    if(!narrative) return;
-    if(restoredCount === totalMissions){
-      narrative.innerText = "The Macro Realm is stabilized. Every system has been restored. The machine finally stopped screaming.";
-      return;
-    }
-    const activeKey = getSortedMissionKeys().find(key => getStorageFlag(games[key].startedKey) && !getStorageFlag(games[key].statusKey));
-    if(activeKey){ narrative.innerText = games[activeKey].storyActive || "A mission is active. Finish the run."; return; }
-    if(nextMissionKey){ narrative.innerText = games[nextMissionKey].storyIntro || "Begin the next mission to stabilize the Macro Realm."; return; }
-    narrative.innerText = `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored. Keep moving.`;
+  const sortedKeys = getSortedMissionKeys();
+
+  const restoredKeys = sortedKeys.filter(key => getStorageFlag(games[key].statusKey));
+  const activeKey = sortedKeys.find(key => getStorageFlag(games[key].startedKey) && !getStorageFlag(games[key].statusKey));
+  const nextKey = sortedKeys.find(key => !getStorageFlag(games[key].statusKey));
+
+  if(restoredCount === totalMissions){
+    narrative.innerText = "The Macro Realm is stabilized. Every system has been restored. The machine finally stopped screaming.";
+    return;
   }
+
+  if(activeKey){
+    narrative.innerText = games[activeKey].storyActive || "A mission is active. Finish the run.";
+    return;
+  }
+
+  if(nextKey){
+    const nextGame = games[nextKey];
+
+    if(restoredKeys.length === 0){
+      narrative.innerText = nextGame.storyIntro || "Begin the first mission to stabilize the Macro Realm.";
+    } else {
+      const lastRestoredKey = restoredKeys[restoredKeys.length - 1];
+      const lastRestored = games[lastRestoredKey];
+      narrative.innerText = `${lastRestored.storyRestored || "A system has been restored."} ${nextGame.storyIntro || "Continue to the next mission."}`;
+    }
+
+    return;
+  }
+
+  narrative.innerText = `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored. Keep moving.`;
+}
 
   function launchNextMission(){ if(nextMissionKey){ selectGame(nextMissionKey); } }
-
-  function renderMacroLog(){
-    const target = document.getElementById("macroLogContent");
-    if(!target) return;
-    const save = getHubSave();
-    const log = save.log || [];
-    if(log.length === 0){ target.innerHTML = "No mission activity recorded yet."; return; }
-    target.innerHTML = log.map(entry => {
-      const date = new Date(entry.timestamp || Date.now()).toLocaleString();
-      return `<div class="macro-log-entry"><div class="macro-log-title">${entry.mission}</div><div>${entry.message}</div><div class="macro-log-meta">${date}</div></div>`;
-    }).join("");
+function renderMacroLog(){
+  const target = document.getElementById("macroLogContent");
+  if(!target) return;
+  const save = getHubSave();
+  const log = save.log || [];
+  if(log.length === 0){
+    target.innerHTML = "No mission activity recorded yet.";
+    return;
   }
+  target.innerHTML = log.map(entry => {
+    const date = new Date(entry.timestamp || Date.now());
+    const readableDate = isNaN(date) ? "" : date.toLocaleString();
+    return `<div class="macro-log-entry"><div class="macro-log-title">${entry.message}</div><div class="macro-log-meta">${entry.mission || "Macro Hub"} · ${readableDate}</div></div>`;
+  }).join("");
+}
 
   function renderArtifactVault(){
     const target = document.getElementById("artifactVaultContent");
@@ -1525,39 +1670,83 @@
 
   function closeArtifactModal(){ document.getElementById("artifactDetailModal").classList.remove("active"); }
 
-  function restoreMissionFromCode(){
-    const selector = document.getElementById("recoveryMission");
-    const codeInput = document.getElementById("recoveryCode");
-    const message = document.getElementById("recoveryMessage");
-    if(!selector || !codeInput || !message) return;
-    const gameKey = selector.value;
-    const game = games[gameKey];
-    const enteredCode = codeInput.value.trim().toUpperCase();
-    if(!game){ message.innerText = "No mission selected."; return; }
-    if(enteredCode !== (game.recoveryCode || "").toUpperCase()){
-      message.innerText = "That recovery code does not match this mission.";
-      return;
-    }
-    localStorage.setItem(game.statusKey, "true");
-    localStorage.setItem(game.startedKey, "true");
-    localStorage.setItem(game.roomKey, "30");
-    recordMissionProgress(gameKey, { started:true, completed:true, room:"30", logMessage:`${game.title} restored from recovery code.` });
-    updateGameStatuses();
-    renderMacroLog();
-    renderArtifactVault();
-    message.innerText = `${game.title} restored as complete on this device.`;
+
+  function normalizeRecoveryCode(value){
+    return String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+  }
+function restoreMissionFromCode(){
+  const selector = document.getElementById("recoveryMission");
+  const codeInput = document.getElementById("recoveryCode");
+  const message = document.getElementById("recoveryMessage");
+  if(!selector || !codeInput || !message) return;
+
+  const gameKey = selector.value;
+  const game = games[gameKey];
+  const enteredCode = normalizeRecoveryCode(codeInput.value);
+  const expectedCode = normalizeRecoveryCode(game ? game.recoveryCode : "");
+
+  if(!game){
+    message.className = "recovery-message error";
+    message.innerText = "No mission selected.";
+    return;
   }
 
-  function selectGame(gameKey){
-    if(!games[gameKey]){ alert("Select a mission first."); return; }
+  if(!enteredCode){
+    message.className = "recovery-message error";
+    message.innerText = "Enter a recovery code first.";
+    return;
+  }
+
+  if(!expectedCode || enteredCode !== expectedCode){
+    message.className = "recovery-message error";
+    message.innerText = "That recovery code does not match this mission.";
+    return;
+  }
+
+  localStorage.setItem(game.statusKey, "true");
+  localStorage.setItem(game.startedKey, "true");
+  localStorage.setItem(game.roomKey, "30");
+
+  recordMissionProgress(gameKey, {
+    started:true,
+    completed:true,
+    room:"30",
+    logMessage:`${game.title} restored from recovery code.`
+  });
+
+  updateGameStatuses();
+  renderMacroLog();
+  renderArtifactVault();
+
+  message.className = "recovery-message success";
+  message.innerText = `${game.title} restored as complete on this device.`;
+  codeInput.value = "";
+}
+function selectGame(gameKey){
+    if(!games[gameKey]){
+      alert("Select a mission first.");
+      return;
+    }
+
     if(!isMissionUnlocked(gameKey) && !getStorageFlag(games[gameKey].statusKey)){
       alert("This mission is locked. Restore the previous system first.");
       return;
     }
+
     localStorage.setItem("selectedGauntlet", gameKey);
     localStorage.setItem("selectedMission", gameKey);
     localStorage.setItem(games[gameKey].startedKey, "true");
-    recordMissionProgress(gameKey, { started:true, completed:getStorageFlag(games[gameKey].statusKey), room:localStorage.getItem(games[gameKey].roomKey), logMessage:`${games[gameKey].title} opened from the Macro Test Prep hub.` });
+
+    recordMissionProgress(gameKey, {
+      started:true,
+      completed:getStorageFlag(games[gameKey].statusKey),
+      room:localStorage.getItem(games[gameKey].roomKey),
+      logMessage:`${games[gameKey].title} selected from the Macro Test Prep hub.`
+    });
+
     updateGameStatuses();
     stopMenuMusic();
     window.location.href = games[gameKey].file;
@@ -1576,4 +1765,5 @@
 </script>
 </body>
 </html>
+
 
