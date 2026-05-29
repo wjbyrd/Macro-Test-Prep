@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Macroeconomics Review System</title>
+<!-- REALM UPGRADE TRANSFER v2: non-theme hub upgrades ported from The Economic Realm. -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&display=swap');
@@ -305,6 +306,15 @@
     color:rgba(255,255,255,.68);
     letter-spacing:.04em;
   }
+
+.custodian-briefing{
+  max-width:780px;
+  margin:8px auto 0;
+  font-size:13px;
+  line-height:1.3;
+  color:rgba(255,255,255,.70);
+  letter-spacing:.045em;
+}
 
 .realm-status-panel{
   width:min(680px, 100%);
@@ -844,6 +854,10 @@ body{
   overscroll-behavior-y:contain;
 }
 
+#mainMenu .menu-shell{
+  padding-bottom:120px;
+}
+
 @media (max-width: 768px){
   #mainMenu{
     padding:18px 16px 24px;
@@ -921,10 +935,14 @@ body{
       Select a macro mission. Each mission targets a different part of the course, adapts to your performance, and reports completion when you finish.
     </p>
 
+    <p class="custodian-briefing">
+      The Custodian has opened the macro archive. Each restored system strengthens your command of money, inflation, aggregate demand, policy transmission, and expectations. Choose the next crisis, recover the artifacts, and prove your judgment holds under pressure.
+    </p>
+
     <div class="briefing-folder collapsed" id="briefingFolder">
       <button class="briefing-folder-header" onclick="toggleBriefingFolder()" aria-expanded="false" aria-controls="briefingFolderBody">
         <div>
-          <div class="briefing-folder-label">Macro Briefing</div>
+          <div class="briefing-folder-label">CUSTODIAN'S BRIEFING</div>
           <div id="briefingFolderTitle" class="briefing-folder-title">0 of 4 systems restored</div>
           <div id="briefingFolderSubtext" class="briefing-folder-subtext">Next Mission: The National Engine</div>
         </div>
@@ -1368,6 +1386,15 @@ body{
     if(panel){ panel.classList.add("active"); }
     if(panelId === "macroLogPanel"){ renderMacroLog(); }
     if(panelId === "artifactVaultPanel"){ renderArtifactVault(); }
+    if(panelId === "recoveryPanel"){
+      const message = document.getElementById("recoveryMessage");
+      const codeInput = document.getElementById("recoveryCode");
+      if(message){
+        message.className = "recovery-message";
+        message.innerText = "";
+      }
+      if(codeInput){ codeInput.value = ""; }
+    }
   }
 function getHubSave(){
   const defaultSave = {
@@ -1396,7 +1423,46 @@ function setHubSave(save){
   save.lastUpdated = new Date().toISOString();
   localStorage.setItem(HUB_SAVE_KEY, JSON.stringify(save));
 }
-function recordMissionProgress(gameKey, details = {}
+function recordMissionProgress(gameKey, details = {}){
+  const game = games[gameKey];
+  if(!game) return;
+
+  const save = getHubSave();
+  save.missions = save.missions || {};
+  save.log = save.log || [];
+
+  if(!save.missions[gameKey]){
+    save.missions[gameKey] = {};
+  }
+
+  save.missions[gameKey] = {
+    ...save.missions[gameKey],
+    title: game.title,
+    started: details.started ?? save.missions[gameKey].started ?? getStorageFlag(game.startedKey),
+    completed: details.completed ?? save.missions[gameKey].completed ?? getStorageFlag(game.statusKey),
+    room: details.room ?? save.missions[gameKey].room ?? localStorage.getItem(game.roomKey) ?? null,
+    accuracy: details.accuracy ?? save.missions[gameKey].accuracy ?? null,
+    bestStreak: details.bestStreak ?? save.missions[gameKey].bestStreak ?? null,
+    totalAttempts: details.totalAttempts ?? save.missions[gameKey].totalAttempts ?? null,
+    weakestTag: details.weakestTag ?? save.missions[gameKey].weakestTag ?? null,
+    strongestTag: details.strongestTag ?? save.missions[gameKey].strongestTag ?? null,
+    artifact: details.artifact ?? save.missions[gameKey].artifact ?? null,
+    completedAt: details.completed ? new Date().toISOString() : save.missions[gameKey].completedAt ?? null,
+    updatedAt: new Date().toISOString()
+  };
+
+  if(details.logMessage){
+    save.log.unshift({
+      mission: game.title,
+      message: details.logMessage,
+      timestamp: new Date().toISOString()
+    });
+    save.log = save.log.slice(0, 30);
+  }
+
+  setHubSave(save);
+}
+
 function syncHubSaveFromExistingKeys(){
   Object.keys(games).forEach(key => {
     const game = games[key];
@@ -1512,57 +1578,81 @@ function updateGameStatuses(){
     }
   });
 
-  updateBriefingSummary(restoredCount, contestedCount, totalMissions);
-  updateMacroNarrative(restoredCount, contestedCount, totalMissions);
+  updateNextMission();
+  updateMacroNarrative();
+  updateBriefingFolderSummary(restoredCount, totalMissions);
   renderArtifactVault();
 }
-function updateBriefingSummary(restoredCount, contestedCount, totalMissions){
+function updateBriefingFolderSummary(restoredCount, totalMissions){
   const title = document.getElementById("briefingFolderTitle");
   const subtext = document.getElementById("briefingFolderSubtext");
-  const nextTitle = document.getElementById("nextMissionTitle");
-  const nextReason = document.getElementById("nextMissionReason");
-  const nextButton = document.getElementById("nextMissionButton");
-
-  nextMissionKey = getSortedMissionKeys().find(key => !getStorageFlag(games[key].statusKey)) || null;
 
   if(title){
     title.innerText = `${restoredCount} of ${totalMissions} ${pluralize(totalMissions, "system", "systems")} restored`;
   }
 
-  if(!nextMissionKey){
-    if(subtext){ subtext.innerText = "All systems restored"; }
-    if(nextTitle){ nextTitle.innerText = "Macro Realm Stabilized"; }
-    if(nextReason){ nextReason.innerText = "Every major macro system has been restored. The Realm is stable."; }
-    if(nextButton){ nextButton.innerText = "No Mission Remaining"; nextButton.disabled = true; }
+  if(subtext){
+    if(nextMissionKey && games[nextMissionKey]){
+      const game = games[nextMissionKey];
+      const started = getStorageFlag(game.startedKey);
+      const room = localStorage.getItem(game.roomKey);
+      subtext.innerText = started && room
+        ? `Continue: ${game.title} · Room ${room}`
+        : `Next Mission: ${game.title}`;
+    } else {
+      subtext.innerText = "All systems restored";
+    }
+  }
+}
+
+function updateNextMission(){
+  const nextMissionBox = document.getElementById("nextMissionBox");
+  const nextMissionTitle = document.getElementById("nextMissionTitle");
+  const nextMissionReason = document.getElementById("nextMissionReason");
+  const nextMissionButton = document.getElementById("nextMissionButton");
+
+  const orderedKeys = getSortedMissionKeys();
+  nextMissionKey = orderedKeys.find(key => !getStorageFlag(games[key].statusKey)) || null;
+
+  if(!nextMissionBox || !nextMissionTitle || !nextMissionReason || !nextMissionButton){
     return;
   }
 
-  const nextGame = games[nextMissionKey];
-  const started = getStorageFlag(nextGame.startedKey);
-  const room = localStorage.getItem(nextGame.roomKey);
+  if(nextMissionKey){
+    const game = games[nextMissionKey];
+    const started = getStorageFlag(game.startedKey);
+    const room = localStorage.getItem(game.roomKey);
 
-  if(subtext){ subtext.innerText = `Next Mission: ${nextGame.title}`; }
-  if(nextTitle){ nextTitle.innerText = nextGame.title; }
+    nextMissionTitle.innerText = game.title;
 
-  if(started && room){
-    if(nextReason){ nextReason.innerText = `${nextGame.contestedText || "Mission active"} · Continue from Room ${room}.`; }
-    if(nextButton){ nextButton.innerText = "Continue Mission"; nextButton.disabled = false; }
+    if(started && room){
+      nextMissionReason.innerText = `${game.contestedText || "Mission active"} · Continue from Room ${room}.`;
+      nextMissionButton.innerText = "Continue Mission";
+    } else {
+      nextMissionReason.innerText = game.nextReason || "Begin the next available mission.";
+      nextMissionButton.innerText = "Begin Next Mission";
+    }
+
+    nextMissionButton.disabled = false;
+    nextMissionBox.dataset.realmState = "active";
   } else {
-    if(nextReason){ nextReason.innerText = nextGame.nextReason || "Begin the next available mission."; }
-    if(nextButton){ nextButton.innerText = "Begin Next Mission"; nextButton.disabled = false; }
+    nextMissionTitle.innerText = "Macro Realm Stabilized";
+    nextMissionReason.innerText = "Every major macro system has been restored. The Realm is stable.";
+    nextMissionButton.innerText = "All Missions Complete";
+    nextMissionButton.disabled = true;
+    nextMissionBox.dataset.realmState = "complete";
   }
 }
-function updateMacroNarrative(restoredCount, contestedCount, totalMissions){
+function updateMacroNarrative(){
   const narrative = document.getElementById("macroNarrativeText");
   if(!narrative) return;
 
-  const sortedKeys = getSortedMissionKeys();
+  const orderedKeys = getSortedMissionKeys();
+  const restoredKeys = orderedKeys.filter(key => getStorageFlag(games[key].statusKey));
+  const activeKey = orderedKeys.find(key => getStorageFlag(games[key].startedKey) && !getStorageFlag(games[key].statusKey));
+  const nextKey = orderedKeys.find(key => !getStorageFlag(games[key].statusKey));
 
-  const restoredKeys = sortedKeys.filter(key => getStorageFlag(games[key].statusKey));
-  const activeKey = sortedKeys.find(key => getStorageFlag(games[key].startedKey) && !getStorageFlag(games[key].statusKey));
-  const nextKey = sortedKeys.find(key => !getStorageFlag(games[key].statusKey));
-
-  if(restoredCount === totalMissions){
+  if(restoredKeys.length === orderedKeys.length){
     narrative.innerText = "The Macro Realm is stabilized. Every system has been restored. The machine finally stopped screaming.";
     return;
   }
@@ -1574,7 +1664,6 @@ function updateMacroNarrative(restoredCount, contestedCount, totalMissions){
 
   if(nextKey){
     const nextGame = games[nextKey];
-
     if(restoredKeys.length === 0){
       narrative.innerText = nextGame.storyIntro || "Begin the first mission to stabilize the Macro Realm.";
     } else {
@@ -1582,11 +1671,10 @@ function updateMacroNarrative(restoredCount, contestedCount, totalMissions){
       const lastRestored = games[lastRestoredKey];
       narrative.innerText = `${lastRestored.storyRestored || "A system has been restored."} ${nextGame.storyIntro || "Continue to the next mission."}`;
     }
-
     return;
   }
 
-  narrative.innerText = `${restoredCount} ${pluralize(restoredCount, "system", "systems")} restored. Keep moving.`;
+  narrative.innerText = "The Macro Realm remains unstable. Restore each system in sequence to bring the economy back under control.";
 }
 
   function launchNextMission(){ if(nextMissionKey){ selectGame(nextMissionKey); } }
