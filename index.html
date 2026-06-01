@@ -2034,8 +2034,8 @@ function renderMacroLog(){
 
 
 function escapeForAttribute(value){
-  return String(value || "")
-    .replace(/\/g, "\\")
+  return String(value)
+    .replace(/\\/g, "\\\\")
     .replace(/'/g, "\\'")
     .replace(/"/g, "&quot;")
     .replace(/\n/g, " ");
