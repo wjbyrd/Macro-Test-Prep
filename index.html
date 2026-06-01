@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Macroeconomics Review System</title>
-<!-- REALM UPGRADE TRANSFER v2: non-theme hub upgrades ported from The Economic Realm. -->
+<!-- REALM UPGRADE TRANSFER v3: non-theme hub upgrades ported from The Economic Realm, including achievement tracking. -->
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&display=swap');
@@ -828,6 +828,258 @@
 }
 
 
+/* =========================================================
+   UPGRADE: Achievement System Panel
+   - Ported from The Economic Realm and adapted for Macro Test Prep.
+   - Reads mission completion plus mode/stat keys from localStorage.
+   ========================================================= */
+.achievement-summary{
+  margin:0 0 16px;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(125,211,252,.15);
+  background:
+    radial-gradient(circle at top left, rgba(247,217,130,.12), transparent 56%),
+    rgba(255,255,255,.045);
+}
+
+.achievement-summary-label{
+  font-size:10px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:rgba(191,219,254,.52);
+  margin-bottom:5px;
+}
+
+.achievement-summary-title{
+  font-size:24px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#f7d982;
+  font-weight:700;
+  text-shadow:0 0 14px rgba(247,217,130,.22);
+}
+
+.achievement-summary-text{
+  margin-top:6px;
+  font-size:13px;
+  line-height:1.4;
+  color:rgba(219,234,254,.66);
+  letter-spacing:.04em;
+}
+
+.achievement-progress-track{
+  margin-top:12px;
+  height:10px;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid rgba(125,211,252,.15);
+  background:rgba(255,255,255,.055);
+  box-shadow:inset 0 0 10px rgba(0,0,0,.55);
+}
+
+.achievement-progress-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(56,189,248,.85), rgba(247,217,130,.95));
+  box-shadow:0 0 14px rgba(247,217,130,.28);
+  transition:width .25s ease;
+}
+
+.achievement-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.achievement-card{
+  display:grid;
+  grid-template-columns:56px 1fr;
+  gap:12px;
+  align-items:center;
+  padding:13px;
+  border-radius:14px;
+  border:1px solid rgba(125,211,252,.14);
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,.08), transparent 54%),
+    rgba(255,255,255,.04);
+  cursor:pointer;
+}
+
+.achievement-card.unlocked{
+  border-color:rgba(247,217,130,.40);
+  background:
+    radial-gradient(circle at top left, rgba(247,217,130,.15), transparent 56%),
+    rgba(255,255,255,.055);
+  box-shadow:0 0 20px rgba(247,217,130,.08), inset 0 0 18px rgba(255,255,255,.025);
+}
+
+.achievement-card.locked{
+  opacity:.54;
+  filter:grayscale(.55);
+}
+
+.achievement-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(247,217,130,.46);
+  box-shadow:0 0 22px rgba(247,217,130,.10), 0 0 18px rgba(56,189,248,.10);
+}
+
+.achievement-icon{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(125,211,252,.16);
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,.12), transparent 66%),
+    rgba(0,0,0,.28);
+  font-size:24px;
+  line-height:1;
+}
+
+.achievement-icon img{
+  width:46px;
+  height:46px;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 0 10px rgba(56,189,248,.12));
+}
+
+.achievement-card.unlocked .achievement-icon{
+  border-color:rgba(247,217,130,.42);
+  box-shadow:0 0 16px rgba(247,217,130,.16);
+}
+
+.achievement-card.unlocked .achievement-icon img{
+  filter:drop-shadow(0 0 12px rgba(247,217,130,.22));
+}
+
+.achievement-icon.missing-icon::after{
+  content:"★";
+  color:rgba(247,217,130,.88);
+}
+
+.achievement-name{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.92);
+}
+
+.achievement-desc{
+  margin-top:4px;
+  font-size:12.5px;
+  line-height:1.32;
+  color:rgba(219,234,254,.64);
+}
+
+.achievement-status{
+  margin-top:7px;
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.42);
+}
+
+.achievement-card.unlocked .achievement-status{
+  color:#f7d982;
+}
+
+.achievement-detail-modal{
+  position:fixed;
+  inset:0;
+  z-index:26;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(6px);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .22s ease, visibility .22s ease;
+}
+
+.achievement-detail-modal.active{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+
+.achievement-detail-card{
+  width:min(520px, 100%);
+  max-height:86vh;
+  overflow:auto;
+  padding:24px;
+  border-radius:18px;
+  background:radial-gradient(circle at top, rgba(247,217,130,.13), transparent 45%), rgba(0,0,0,.96);
+  border:1px solid rgba(247,217,130,.28);
+  box-shadow:0 24px 70px rgba(0,0,0,.82), 0 0 32px rgba(247,217,130,.12);
+}
+
+.achievement-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  padding-bottom:12px;
+  margin-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+
+.achievement-detail-title{
+  margin:0;
+  font-size:26px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.achievement-detail-body{
+  text-align:center;
+}
+
+.achievement-detail-image{
+  width:220px;
+  height:220px;
+  max-width:100%;
+  object-fit:contain;
+  border-radius:16px;
+  border:1px solid rgba(125,211,252,.14);
+  background:rgba(255,255,255,.04);
+  padding:10px;
+  filter:drop-shadow(0 0 18px rgba(247,217,130,.18));
+}
+
+.achievement-detail-status{
+  margin-top:13px;
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(247,217,130,.72);
+}
+
+.achievement-detail-description{
+  max-width:390px;
+  margin:10px auto 0;
+  font-size:15px;
+  line-height:1.45;
+  color:rgba(219,234,254,.74);
+}
+
+@media(max-width:680px){
+  .achievement-grid{grid-template-columns:1fr;}
+  .achievement-card{grid-template-columns:46px 1fr;}
+  .achievement-icon{width:46px; height:46px;}
+  .achievement-icon img{width:38px; height:38px;}
+}
+
+
 
 /* =========================================================
    MOBILE SCROLL FIX — MACRO TEST PREP
@@ -1059,6 +1311,7 @@ body{
         <button class="macro-menu-action" onclick="showMacroPanel('instructionsPanel')">How This Works</button>
         <button class="macro-menu-action" onclick="showMacroPanel('macroLogPanel')">Mission Log</button>
         <button class="macro-menu-action" onclick="showMacroPanel('artifactVaultPanel')">Artifact Vault</button>
+        <button class="macro-menu-action" onclick="showMacroPanel('achievementsPanel')">Achievements</button>
         <button class="macro-menu-action" onclick="showMacroPanel('recoveryPanel')">Recover Progress</button>
         <button class="macro-menu-action" onclick="toggleMenuMusic()">Toggle Sound</button>
       </div>
@@ -1082,6 +1335,10 @@ body{
       <div id="artifactVaultPanel" class="macro-panel">
         <p>Each restored system unlocks its full artifact set here. Duplicate item keys are namespaced by mission, so repeated names do not collide in the vault logic.</p>
         <div id="artifactVaultContent">No artifacts cataloged yet.</div>
+      </div>
+
+      <div id="achievementsPanel" class="macro-panel">
+        <div id="achievementsContent">No achievements calculated yet.</div>
       </div>
 
       <div id="recoveryPanel" class="macro-panel">
@@ -1119,6 +1376,20 @@ body{
           <p><span class="artifact-detail-label">Concept Power</span><span id="artifactDetailConceptPower"></span></p>
           <p><span class="artifact-detail-label">Why It Matters</span><span id="artifactDetailWhyItMatters"></span></p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="achievementDetailModal" class="achievement-detail-modal" aria-label="Achievement detail dialog">
+    <div class="achievement-detail-card">
+      <div class="achievement-detail-header">
+        <h2 id="achievementDetailTitle" class="achievement-detail-title">Achievement</h2>
+        <button class="help-close-btn" onclick="closeAchievementModal()" aria-label="Close achievement detail">Close ×</button>
+      </div>
+      <div class="achievement-detail-body">
+        <img id="achievementDetailImage" class="achievement-detail-image" src="" alt="">
+        <div id="achievementDetailStatus" class="achievement-detail-status">Locked</div>
+        <div id="achievementDetailDescription" class="achievement-detail-description"></div>
       </div>
     </div>
   </section>
@@ -1375,6 +1646,7 @@ body{
   function openMacroMenu(){
     renderMacroLog();
     renderArtifactVault();
+    renderAchievements();
     document.getElementById("macroMenuModal").classList.add("active");
   }
 
@@ -1386,6 +1658,7 @@ body{
     if(panel){ panel.classList.add("active"); }
     if(panelId === "macroLogPanel"){ renderMacroLog(); }
     if(panelId === "artifactVaultPanel"){ renderArtifactVault(); }
+    if(panelId === "achievementsPanel"){ renderAchievements(); }
     if(panelId === "recoveryPanel"){
       const message = document.getElementById("recoveryMessage");
       const codeInput = document.getElementById("recoveryCode");
@@ -1582,6 +1855,7 @@ function updateGameStatuses(){
   updateMacroNarrative();
   updateBriefingFolderSummary(restoredCount, totalMissions);
   renderArtifactVault();
+  renderAchievements();
 }
 function updateBriefingFolderSummary(restoredCount, totalMissions){
   const title = document.getElementById("briefingFolderTitle");
@@ -1759,6 +2033,370 @@ function renderMacroLog(){
   function closeArtifactModal(){ document.getElementById("artifactDetailModal").classList.remove("active"); }
 
 
+function escapeForAttribute(value){
+  return String(value || "")
+    .replace(/\/g, "\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, "&quot;")
+    .replace(/\n/g, " ");
+}
+
+function openAchievementModal(image, title, description, status){
+  const modal = document.getElementById("achievementDetailModal");
+  const modalImage = document.getElementById("achievementDetailImage");
+  const modalTitle = document.getElementById("achievementDetailTitle");
+  const modalStatus = document.getElementById("achievementDetailStatus");
+  const modalDescription = document.getElementById("achievementDetailDescription");
+
+  if(!modal || !modalImage || !modalTitle || !modalStatus || !modalDescription) return;
+
+  modalImage.src = image || "";
+  modalImage.alt = title || "Achievement";
+  modalImage.style.display = image ? "inline-block" : "none";
+  modalTitle.innerText = title || "Achievement";
+  modalStatus.innerText = status || "Locked";
+  modalDescription.innerText = description || "Achievement details unavailable.";
+
+  modal.classList.add("active");
+}
+
+function closeAchievementModal(){
+  const modal = document.getElementById("achievementDetailModal");
+  if(modal){ modal.classList.remove("active"); }
+}
+
+/* =========================================================
+   UPGRADE: Macro Achievement System
+   ========================================================= */
+const ACHIEVEMENT_DEFINITIONS = [
+  {
+    id: "firstSteps",
+    title: "First Steps",
+    description: "Complete one standard mission.",
+    icon: "first_steps.png",
+    unlocked: stats => stats.standardCompletions >= 1
+  },
+  {
+    id: "gearsAssembled",
+    title: "Gears Assembled",
+    description: "Complete two standard missions.",
+    icon: "gears_assembled.png",
+    unlocked: stats => stats.standardCompletions >= 2
+  },
+  {
+    id: "engineRestored",
+    title: "Engine Restored",
+    description: "Restore all standard Macro Test Prep missions.",
+    icon: "engine_restored.png",
+    unlocked: stats => stats.standardCompletions >= stats.totalMissions
+  },
+  {
+    id: "unbrokenCurrent",
+    title: "Unbroken Current",
+    description: "Reach a streak of 20.",
+    icon: "unbroken_current.png",
+    unlocked: stats => stats.bestStreak >= 20
+  },
+  {
+    id: "trialByClock",
+    title: "Trial by Clock",
+    description: "Reach Room 30 in Timed Trial with at least 80% accuracy.",
+    icon: "trial_by_clock.png",
+    unlocked: stats => stats.timedRoom >= 30 && stats.timedAccuracy >= 80
+  },
+  {
+    id: "boilerRoomSurvivor",
+    title: "Boiler Room Survivor",
+    description: "Complete an Exam Drill session.",
+    icon: "boiler_room_survivor.png",
+    unlocked: stats => stats.examSessions >= 1
+  },
+  {
+    id: "brassboundChallenger",
+    title: "Brassbound Challenger",
+    description: "Complete one mission in Legendary Mode.",
+    icon: "brassbound_challenger.png",
+    unlocked: stats => stats.legendaryCompletions >= 1
+  },
+  {
+    id: "masterOfTheMachine",
+    title: "Master of the Machine",
+    description: "Complete every mission in Legendary Mode.",
+    icon: "master_machine.png",
+    unlocked: stats => stats.legendaryCompletions >= stats.totalMissions
+  },
+  {
+    id: "perfectCalibration",
+    title: "Perfect Calibration",
+    description: "Defeat all three bosses in a single mission without a wrong answer.",
+    icon: "perfect_calibration.png",
+    unlocked: stats => stats.perfectBossRuns >= 1
+  },
+  {
+    id: "returnGearwright",
+    title: "Return of the Gearwright",
+    description: "Resume a saved run and finish it.",
+    icon: "return_gearwright.png",
+    unlocked: stats => stats.resumeFinishes >= 1
+  },
+  {
+    id: "custodiansCollection",
+    title: "The Custodian’s Collection",
+    description: "Collect six artifacts.",
+    icon: "custodians_collection.png",
+    unlocked: stats => stats.artifactsCollected >= 6
+  },
+  {
+    id: "custodiansTrial",
+    title: "The Custodian’s Trial",
+    description: "Answer 400 questions correctly.",
+    icon: "custodians_trial.png",
+    unlocked: stats => stats.totalCorrect >= 400
+  }
+];
+
+function getMissionPrefixes(){
+  return {
+    engine: ["engine", "nationalEngine", "theNationalEngine"],
+    mint: ["mint", "mintOfAshAndGold", "theMintOfAshAndGold"],
+    nexus: ["nexus", "commandNexus", "theCommandNexus"],
+    citadel: ["citadel", "exchangeCitadel", "theExchangeCitadel"]
+  };
+}
+
+function localStorageNumber(key){
+  const value = Number(localStorage.getItem(key));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function localStorageFlag(key){
+  const value = localStorage.getItem(key);
+  return value === "true" || value === "1";
+}
+
+function getAllLocalStorageEntries(){
+  const entries = [];
+  for(let i = 0; i < localStorage.length; i++){
+    const key = localStorage.key(i);
+    entries.push({
+      key,
+      lowerKey: String(key || "").toLowerCase(),
+      value: localStorage.getItem(key)
+    });
+  }
+  return entries;
+}
+
+function getMaxNumberFromKeys(keyMatchers){
+  return getAllLocalStorageEntries().reduce((max, entry) => {
+    const matches = keyMatchers.some(matcher => matcher(entry.lowerKey));
+    if(!matches) return max;
+    const value = Number(entry.value);
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 0);
+}
+
+function countTrueKeys(keyMatchers){
+  return getAllLocalStorageEntries().reduce((count, entry) => {
+    const matches = keyMatchers.some(matcher => matcher(entry.lowerKey));
+    const isTrue = entry.value === "true" || entry.value === "1";
+    return matches && isTrue ? count + 1 : count;
+  }, 0);
+}
+
+function sumNumberFromKeys(keyMatchers){
+  return getAllLocalStorageEntries().reduce((sum, entry) => {
+    const matches = keyMatchers.some(matcher => matcher(entry.lowerKey));
+    if(!matches) return sum;
+    const value = Number(entry.value);
+    return Number.isFinite(value) ? sum + value : sum;
+  }, 0);
+}
+
+function getBestTimedTrialRecord(){
+  const prefixes = Object.values(getMissionPrefixes()).flat().map(prefix => prefix.toLowerCase());
+  let best = { room: 0, accuracy: 0 };
+
+  prefixes.forEach(prefix => {
+    const room = Math.max(
+      localStorageNumber(`${prefix}timedlasthighestroom`),
+      localStorageNumber(`${prefix}timedbestroom`),
+      localStorageNumber(`${prefix}timedlastroom`),
+      localStorageNumber(`macrohub_${prefix}_timed_room`),
+      localStorageNumber(`macrohub_${prefix}_timed_best_room`)
+    );
+    const accuracy = Math.max(
+      localStorageNumber(`${prefix}timedlastaccuracy`),
+      localStorageNumber(`${prefix}timedbestaccuracy`),
+      localStorageNumber(`macrohub_${prefix}_timed_accuracy`),
+      localStorageNumber(`macrohub_${prefix}_timed_best_accuracy`)
+    );
+
+    if(room > best.room || (room === best.room && accuracy > best.accuracy)){
+      best = { room, accuracy };
+    }
+  });
+
+  getAllLocalStorageEntries().forEach(entry => {
+    if(entry.lowerKey.includes("timed") && entry.lowerKey.includes("room")){
+      const room = Number(entry.value);
+      if(Number.isFinite(room)){ best.room = Math.max(best.room, room); }
+    }
+    if(entry.lowerKey.includes("timed") && entry.lowerKey.includes("accuracy")){
+      const accuracy = Number(entry.value);
+      if(Number.isFinite(accuracy)){ best.accuracy = Math.max(best.accuracy, accuracy); }
+    }
+  });
+
+  return best;
+}
+
+function getAchievementStats(){
+  const orderedKeys = getSortedMissionKeys();
+  const totalMissions = orderedKeys.length;
+  const save = getHubSave();
+  const missionSave = save.missions || {};
+
+  const standardCompletions = orderedKeys.filter(key => localStorageFlag(games[key].statusKey)).length;
+
+  const legendaryCompletions = orderedKeys.filter(key => {
+    const candidates = [
+      `macroHub_${key}_legendary_complete`,
+      `macrohub_${key}_legendary_complete`,
+      `${key}LegendaryComplete`,
+      `${key}_legendary_complete`,
+      `macroTestPrep_${key}_legendary_complete`
+    ];
+    return candidates.some(localStorageFlag);
+  }).length;
+
+  const artifactsCollected = orderedKeys.reduce((count, key) => {
+    return localStorageFlag(games[key].statusKey) ? count + ((games[key].artifacts || []).length) : count;
+  }, 0);
+
+  const timedRecord = getBestTimedTrialRecord();
+
+  const bestStreak = Math.max(
+    getMaxNumberFromKeys([
+      key => key.includes("macrohub") && (key.includes("maxstreak") || key.includes("beststreak")),
+      key => key.includes("maxstreak"),
+      key => key.includes("beststreak"),
+      key => key.includes("timedlaststreak")
+    ]),
+    ...Object.values(missionSave).map(mission => Number(mission.bestStreak || 0))
+  );
+
+  const examSessions = countTrueKeys([
+    key => key.includes("macrohub") && key.includes("exam") && (key.includes("complete") || key.includes("survivor")),
+    key => key.includes("exam") && (key.includes("complete") || key.includes("survivor"))
+  ]);
+
+  const perfectBossRuns = countTrueKeys([
+    key => key.includes("perfect") && (key.includes("boss") || key.includes("calibration")) && (key.includes("complete") || key.includes("run"))
+  ]);
+
+  const resumeFinishes = countTrueKeys([
+    key => (key.includes("resume") || key.includes("rebuild") || key.includes("gearwright")) && (key.includes("finish") || key.includes("complete"))
+  ]);
+
+  const totalCorrect = Math.max(
+    localStorageNumber("macroHub_totalCorrect"),
+    localStorageNumber("macroHub_totalCorrectAnswers"),
+    localStorageNumber("macroTestPrep_totalCorrect"),
+    localStorageNumber("macroTestPrep_totalCorrectAnswers"),
+    sumNumberFromKeys([
+      key => key.includes("correcttotal"),
+      key => key.includes("totalcorrect"),
+      key => key.includes("correctanswerslifetime")
+    ])
+  );
+
+  return {
+    totalMissions,
+    standardCompletions,
+    legendaryCompletions,
+    artifactsCollected,
+    bestStreak,
+    timedRoom: timedRecord.room,
+    timedAccuracy: timedRecord.accuracy,
+    examSessions,
+    perfectBossRuns,
+    resumeFinishes,
+    totalCorrect
+  };
+}
+
+function getUnlockedAchievements(){
+  const stats = getAchievementStats();
+  return ACHIEVEMENT_DEFINITIONS.map(achievement => {
+    let unlocked = false;
+    try{
+      unlocked = !!achievement.unlocked(stats);
+    } catch(error){
+      console.warn("Achievement check failed:", achievement.id, error);
+    }
+    return { ...achievement, unlocked };
+  });
+}
+
+function renderAchievementIcon(item){
+  if(item.icon && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(item.icon)){
+    return `<img src="${item.icon}" alt="" aria-hidden="true" onerror="this.style.display='none'; this.parentElement.classList.add('missing-icon');">`;
+  }
+  return item.icon || "★";
+}
+
+function renderAchievements(){
+  const container = document.getElementById("achievementsContent");
+  if(!container) return;
+
+  const stats = getAchievementStats();
+  const achievements = getUnlockedAchievements();
+  const unlockedCount = achievements.filter(item => item.unlocked).length;
+  const totalCount = achievements.length;
+  const progressPct = totalCount ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
+  const cards = achievements.map(item => {
+    const safeTitle = escapeForAttribute(item.title || "");
+    const safeDescription = escapeForAttribute(item.description || "");
+    const safeIcon = escapeForAttribute(item.icon || "");
+    const safeStatus = escapeForAttribute(item.unlocked ? "Unlocked" : "Locked");
+
+    return `
+      <div class="achievement-card ${item.unlocked ? "unlocked" : "locked"}"
+        onclick="openAchievementModal('${safeIcon}', '${safeTitle}', '${safeDescription}', '${safeStatus}')"
+        role="button"
+        tabindex="0"
+        aria-label="Open achievement ${safeTitle}"
+        onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openAchievementModal('${safeIcon}', '${safeTitle}', '${safeDescription}', '${safeStatus}'); }">
+        <div class="achievement-icon" aria-hidden="true">${renderAchievementIcon(item)}</div>
+        <div>
+          <div class="achievement-name">${item.title}</div>
+          <div class="achievement-desc">${item.description}</div>
+          <div class="achievement-status">${item.unlocked ? "Unlocked" : "Locked"}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <div class="achievement-summary">
+      <div class="achievement-summary-label">Achievement Progress</div>
+      <div class="achievement-summary-title">${unlockedCount}/${totalCount}</div>
+      <div class="achievement-summary-text">
+        ${stats.standardCompletions}/${stats.totalMissions} standard missions restored ·
+        ${stats.legendaryCompletions}/${stats.totalMissions} legendary missions cleared ·
+        ${stats.artifactsCollected} artifacts secured
+      </div>
+      <div class="achievement-progress-track" aria-hidden="true">
+        <div class="achievement-progress-fill" style="width:${progressPct}%"></div>
+      </div>
+    </div>
+    <div class="achievement-grid">${cards}</div>
+  `;
+}
+
+
   function normalizeRecoveryCode(value){
     return String(value || "")
       .trim()
@@ -1808,6 +2446,7 @@ function restoreMissionFromCode(){
   updateGameStatuses();
   renderMacroLog();
   renderArtifactVault();
+  renderAchievements();
 
   message.className = "recovery-message success";
   message.innerText = `${game.title} restored as complete on this device.`;
@@ -1843,9 +2482,12 @@ function selectGame(gameKey){
   document.addEventListener("keydown", event => {
     if(event.key === "Escape"){
       const artifactModal = document.getElementById("artifactDetailModal");
+      const achievementModal = document.getElementById("achievementDetailModal");
       const macroModal = document.getElementById("macroMenuModal");
+      const helpModal = document.getElementById("helpModal");
+      if(achievementModal && achievementModal.classList.contains("active")){ closeAchievementModal(); return; }
       if(artifactModal && artifactModal.classList.contains("active")){ closeArtifactModal(); return; }
-      if(helpModal && helpModal.classList.contains("active")){ closeHelpModal(); return; }
+      if(helpModal && helpModal.classList.contains("active") && typeof closeHelpModal === "function"){ closeHelpModal(); return; }
       if(macroModal && macroModal.classList.contains("active")){ closeMacroMenu(); return; }
       stopMenuMusic();
     }
@@ -1853,5 +2495,4 @@ function selectGame(gameKey){
 </script>
 </body>
 </html>
-
 
