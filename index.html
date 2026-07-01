@@ -746,6 +746,9 @@
 .briefing-folder-body{display:none; padding:0 18px 18px;}
 .briefing-folder.open .briefing-folder-body{display:block;}
 .briefing-section{margin-top:12px; padding:14px; border-radius:14px; border:1px solid rgba(125,211,252,.15); background:linear-gradient(180deg, rgba(56,189,248,.07), rgba(255,255,255,.025)), rgba(0,0,0,.28); text-align:center;}
+/* Simplified top briefing to match the cleaner Economic Realm layout. */
+.macro-narrative-box,
+.macro-progression-box{display:none;}
 .briefing-section-label{font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:rgba(191,219,254,.48); margin-bottom:6px;}
 .next-mission-title{font-size:18px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:rgba(255,255,255,.94);}
 .next-mission-reason{max-width:580px; margin:6px auto 11px; font-size:13px; line-height:1.4; color:rgba(219,234,254,.66); letter-spacing:.04em;}
@@ -1202,7 +1205,7 @@ body{
     <p class="menu-kicker">Macroeconomics Review System</p>
     <h1 class="menu-title">Choose Your Mission</h1>
     <p class="custodian-briefing">
-      The Custodian has opened the macro archive. Each restored system strengthens your command of money, inflation, aggregate demand, policy transmission, and expectations. Choose the next mission, recover the artifacts, and prove you can stabilize the realm.
+      The Custodian has opened the macro archive. Each restored system strengthens your command of the economy. Choose the next mission, recover the artifacts, and prove you can stabilize the realm.
     </p>
     <div class="briefing-folder collapsed" id="briefingFolder">
       <button class="briefing-folder-header" onclick="toggleBriefingFolder()" aria-expanded="false" aria-controls="briefingFolderBody">
@@ -1219,7 +1222,7 @@ body{
     <div class="briefing-section-label">Next Mission</div>
     <div id="nextMissionTitle" class="next-mission-title">The National Engine</div>
     <div id="nextMissionReason" class="next-mission-reason">
-      Start with measurement, unemployment, inflation, GDP, and national income before entering deeper macro systems.
+      Start with GDP, inflation, unemployment, income, and equilibrium measurement.
     </div>
     <button id="nextMissionButton" class="next-mission-button" onclick="launchNextMission()">Begin Next Mission</button>
   </div>
@@ -1462,7 +1465,7 @@ body{
       roomKey: "macroHub_engine_room",
       sequence: 1,
       buttonText: "Enter Engine",
-      nextReason: "Start with the national accounts: GDP, inflation, unemployment, income, and equilibrium measurement. You cannot stabilize what you cannot measure.",
+      nextReason: "Start with GDP, inflation, unemployment, income, and equilibrium measurement.",
       storyIntro: "The National Engine is dormant. The gauges are dark, the measurements are suspect, and the economy is not going to interpret itself.",
       storyActive: "The National Engine is running. Measurement errors, labor flows, and national accounts are moving through the system. Finish the run.",
       storyRestored: "The National Engine is restored. The core measures are back online.",
@@ -1506,7 +1509,7 @@ body{
       roomKey: "macroHub_mint_room",
       sequence: 2,
       buttonText: "Enter the Mint",
-      nextReason: "Move into money creation, reserves, long-run growth, inflation, and stabilization. This is where printed confidence meets real constraints.",
+      nextReason: "Move into money, growth, inflation, and stabilization.",
       storyIntro: "The Mint of Ash and Gold is sealed. Money, growth, and stabilization are locked behind the vault doors.",
       storyActive: "The Mint is active. Reserves, capital, inflation, and stabilization pressure are all in motion.",
       storyRestored: "The Mint is restored. Money and growth logic are back under control.",
@@ -1550,7 +1553,7 @@ body{
       roomKey: "macroHub_nexus_room",
       sequence: 3,
       buttonText: "Enter Nexus",
-      nextReason: "Coordinate IS-LM, fiscal policy, monetary policy, and aggregate demand. Policy without mechanism is just noise in a nice suit.",
+      nextReason: "Coordinate IS-LM, fiscal policy, monetary policy, and aggregate demand.",
       storyIntro: "The Command Nexus is offline. Demand maps, rate dials, and stabilization signals need to be recalibrated.",
       storyActive: "The Command Nexus is active. Fiscal force, money pressure, and aggregate demand are being routed through the command table.",
       storyRestored: "The Command Nexus is restored. Short-run policy response is back online.",
@@ -1594,7 +1597,7 @@ body{
       roomKey: "macroHub_citadel_room",
       sequence: 4,
       buttonText: "Enter Citadel",
-      nextReason: "Finish with savings, investment, trade balances, capital flows, exchange rates, and policy pressure across borders.",
+      nextReason: "Finish with trade balances, capital flows, exchange rates, and open-economy policy pressure.",
       storyIntro: "The Exchange Citadel is locked. Trade balances, exchange rates, and capital flows are waiting behind the gate.",
       storyActive: "The Citadel is contested. Savings, investment, trade, capital flows, and exchange pressure are all pulling on the ledger.",
       storyRestored: "The Exchange Citadel is restored. The world ledger is back in balance.",
