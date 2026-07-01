@@ -753,6 +753,24 @@
 .next-mission-button:hover{color:#fff; border-color:rgba(247,217,130,.56); box-shadow:0 0 20px rgba(56,189,248,.14);}
 .next-mission-button:disabled{opacity:.48; cursor:default;}
 .macro-narrative-text{max-width:640px; margin:0 auto; font-size:13px; line-height:1.45; color:rgba(219,234,254,.68); letter-spacing:.045em;}
+.macro-narrative-box{border-color:rgba(247,217,130,.18); background:linear-gradient(180deg, rgba(247,217,130,.055), rgba(56,189,248,.035)), rgba(0,0,0,.26);}
+.macro-progression-box{border-color:rgba(125,211,252,.18);}
+.macro-progression-grid{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-top:10px; text-align:left;}
+.macro-progression-step{position:relative; min-height:118px; padding:12px; border-radius:13px; border:1px solid rgba(125,211,252,.14); background:rgba(255,255,255,.035); box-shadow:inset 0 0 14px rgba(255,255,255,.018);}
+.macro-progression-step::before{content:attr(data-step); position:absolute; top:10px; right:10px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:999px; border:1px solid rgba(125,211,252,.20); color:rgba(219,234,254,.70); font-size:11px; font-weight:700;}
+.macro-progression-step.restored{border-color:rgba(183,247,197,.36); background:linear-gradient(180deg, rgba(34,197,94,.10), rgba(255,255,255,.035));}
+.macro-progression-step.active{border-color:rgba(247,217,130,.42); background:linear-gradient(180deg, rgba(247,217,130,.12), rgba(255,255,255,.035)); box-shadow:0 0 22px rgba(247,217,130,.08), inset 0 0 14px rgba(255,255,255,.02);}
+.macro-progression-step.ready{border-color:rgba(125,211,252,.28); background:linear-gradient(180deg, rgba(56,189,248,.08), rgba(255,255,255,.03));}
+.macro-progression-step.locked{opacity:.62; filter:saturate(.78);}
+.macro-progression-status{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:rgba(247,217,130,.68); margin-bottom:8px; padding-right:28px;}
+.macro-progression-title{font-size:14px; line-height:1.18; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.92); padding-right:24px;}
+.macro-progression-reason{margin-top:8px; font-size:12px; line-height:1.35; color:rgba(219,234,254,.62); letter-spacing:.035em;}
+.macro-progression-action{margin-top:10px; padding:8px 10px; border-radius:999px; border:1px solid rgba(125,211,252,.22); background:rgba(56,189,248,.07); color:rgba(255,255,255,.82); cursor:pointer; font-size:10px; letter-spacing:.12em; text-transform:uppercase;}
+.macro-progression-action:hover{border-color:rgba(247,217,130,.48); color:#fff; box-shadow:0 0 16px rgba(56,189,248,.12);}
+.macro-progression-action:disabled{opacity:.44; cursor:not-allowed; box-shadow:none;}
+@media(max-width:900px){.macro-progression-grid{grid-template-columns:repeat(2, minmax(0, 1fr));}}
+@media(max-width:680px){.macro-progression-grid{grid-template-columns:1fr;}}
+
 .mission-briefing{margin:-6px 0 14px; font-size:13px; line-height:1.35; color:rgba(219,234,254,.55); letter-spacing:.045em;}
 .restored-badge{display:none; margin:0 0 14px; padding:9px 11px; border-radius:12px; border:1px solid rgba(247,217,130,.34); background:radial-gradient(circle at left, rgba(247,217,130,.18), transparent 58%), rgba(255,255,255,.055); color:rgba(255,255,255,.84); font-size:12px; letter-spacing:.09em; text-transform:uppercase;}
 .game-card.restored{border-color:rgba(183,247,197,.50); box-shadow:0 24px 70px rgba(0,0,0,.72), 0 0 34px rgba(183,247,197,.18), inset 0 0 0 1px rgba(255,255,255,.08);}
@@ -1196,6 +1214,7 @@ body{
         <span id="briefingFolderToggle" class="briefing-folder-toggle">Open</span>
       </button>
 <div class="briefing-folder-body" id="briefingFolderBody">
+  <!-- UPGRADE: Sequential macro guidance. Students should move through these systems in order. -->
   <div id="nextMissionBox" class="briefing-section next-mission-box">
     <div class="briefing-section-label">Next Mission</div>
     <div id="nextMissionTitle" class="next-mission-title">The National Engine</div>
@@ -1203,6 +1222,18 @@ body{
       Start with measurement, unemployment, inflation, GDP, and national income before entering deeper macro systems.
     </div>
     <button id="nextMissionButton" class="next-mission-button" onclick="launchNextMission()">Begin Next Mission</button>
+  </div>
+
+  <div class="briefing-section macro-narrative-box">
+    <div class="briefing-section-label">Macro Campaign Briefing</div>
+    <div id="macroNarrativeText" class="macro-narrative-text">
+      Begin with the National Engine, then move through money, policy coordination, and open-economy adjustment.
+    </div>
+  </div>
+
+  <div class="briefing-section macro-progression-box">
+    <div class="briefing-section-label">Progression Route</div>
+    <div id="macroProgressionGrid" class="macro-progression-grid" aria-label="Macro mission progression route"></div>
   </div>
 </div>
     </div>
@@ -1637,6 +1668,7 @@ body{
   }
 
   function openMacroMenu(){
+    updateGameStatuses();
     renderMacroLog();
     renderArtifactVault();
     renderAchievements();
@@ -1770,8 +1802,20 @@ function syncHubSaveFromExistingKeys(){
     if(toggle){ toggle.innerText = shouldOpen ? "Close" : "Open"; }
   }
 
+  /* =========================================================
+     UPGRADE: Ordered macro progression.
+     The hub uses sequence values to recommend/launch the next mission
+     and to lock later systems until earlier systems are restored.
+     ========================================================= */
+
   function getSortedMissionKeys(){
     return Object.keys(games).sort((a, b) => (games[a].sequence || 999) - (games[b].sequence || 999));
+  }
+
+  function getPreviousMissionKey(gameKey){
+    const sortedKeys = getSortedMissionKeys();
+    const index = sortedKeys.indexOf(gameKey);
+    return index > 0 ? sortedKeys[index - 1] : null;
   }
 
   function isMissionUnlocked(gameKey){
@@ -1782,7 +1826,10 @@ function syncHubSaveFromExistingKeys(){
   }
 
   function pluralize(count, singular, plural){ return count === 1 ? singular : plural; }
-  function getStorageFlag(key){ return localStorage.getItem(key) === "true"; }
+  function getStorageFlag(key){
+    const value = localStorage.getItem(key);
+    return value === "true" || value === "1";
+  }
 function updateGameStatuses(){
   let restoredCount = 0;
   let contestedCount = 0;
@@ -1823,11 +1870,13 @@ function updateGameStatuses(){
       if(briefing){ briefing.innerText = game.storyRestored || "System restored."; }
       restoredCount++;
     } else if(!unlocked){
+      const previousKey = getPreviousMissionKey(key);
+      const previousTitle = previousKey && games[previousKey] ? games[previousKey].title : "the previous system";
       statusElement.innerText = game.lockedText || "Locked";
       statusElement.dataset.realmState = "locked";
       if(card){ card.classList.add("locked"); }
       if(badge){ badge.innerText = ""; }
-      if(briefing){ briefing.innerText = "Restore the previous system before entering this mission."; }
+      if(briefing){ briefing.innerText = `Restore ${previousTitle} before entering this mission.`; }
     } else if(started){
       statusElement.innerText = room ? `${game.contestedText || "Contested"} · Room ${room}` : (game.contestedText || "Contested");
       statusElement.dataset.realmState = "contested";
@@ -1846,6 +1895,7 @@ function updateGameStatuses(){
 
   updateNextMission();
   updateMacroNarrative();
+  renderMacroProgression();
   updateBriefingFolderSummary(restoredCount, totalMissions);
   renderArtifactVault();
   renderAchievements();
@@ -1942,6 +1992,57 @@ function updateMacroNarrative(){
   }
 
   narrative.innerText = "The Macro Realm remains unstable. Restore each system in sequence to bring the economy back under control.";
+}
+
+function renderMacroProgression(){
+  const target = document.getElementById("macroProgressionGrid");
+  if(!target) return;
+
+  const sortedKeys = getSortedMissionKeys();
+  target.innerHTML = sortedKeys.map((key, index) => {
+    const game = games[key];
+    const completed = getStorageFlag(game.statusKey);
+    const started = getStorageFlag(game.startedKey);
+    const room = localStorage.getItem(game.roomKey);
+    const unlocked = isMissionUnlocked(key);
+    const previousKey = getPreviousMissionKey(key);
+    const previousTitle = previousKey && games[previousKey] ? games[previousKey].title : "the previous system";
+
+    let state = "ready";
+    let status = "Ready";
+    let reason = game.nextReason || game.storyIntro || "Mission ready.";
+    let actionText = game.buttonText || "Enter Mission";
+    let disabled = false;
+
+    if(completed){
+      state = "restored";
+      status = "Restored";
+      reason = game.storyRestored || "System restored.";
+      actionText = "Review Mission";
+    } else if(!unlocked){
+      state = "locked";
+      status = "Locked";
+      reason = `Restore ${previousTitle} to unlock this system.`;
+      actionText = "Locked";
+      disabled = true;
+    } else if(started){
+      state = "active";
+      status = room ? `Active · Room ${room}` : "Active";
+      reason = game.storyActive || game.nextReason || "Mission active.";
+      actionText = "Continue Mission";
+    }
+
+    return `
+      <article class="macro-progression-step ${state}" data-step="${index + 1}">
+        <div class="macro-progression-status">${status}</div>
+        <div class="macro-progression-title">${game.title}</div>
+        <div class="macro-progression-reason">${reason}</div>
+        <button class="macro-progression-action" ${disabled ? "disabled" : `onclick="selectGame('${key}')"`}>
+          ${actionText}
+        </button>
+      </article>
+    `;
+  }).join("");
 }
 
   function launchNextMission(){ if(nextMissionKey){ selectGame(nextMissionKey); } }
